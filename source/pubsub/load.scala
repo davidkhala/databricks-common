@@ -8,7 +8,7 @@ val authOptions: Map[String, String] =
       "privateKeyId" -> dbutils.secrets.get(scope = "gcp", key = "privateKeyId")
      )
 
-spark.readStream
+var source_df=spark.readStream
   .format("pubsub")
   .option("subscriptionId", "community") 
   .option("topicId", "databricks") 
