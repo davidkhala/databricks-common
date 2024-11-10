@@ -1,6 +1,6 @@
 
-dbutils.widgets.text("source_table", "`azure-open-datasets`.nyctlc.yellow")
-dbutils.widgets.text("target_table", "yellow")
+dbutils.widgets.text("source_table", "samples.nyctaxi.trips")
+dbutils.widgets.text("target_table", "trips")
 
 # Choose "append" to add rows to the table or "overwrite" to replace the table
 dbutils.widgets.dropdown("mode","append", ["append", "overwrite"] )
