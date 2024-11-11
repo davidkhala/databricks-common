@@ -6,8 +6,8 @@ from context import *
 def get_path(path="/"):
     # function to retrieve objects within specified path within workspace
     response = requests.get(
-        API_URL + "/api/2.0/workspace/list",
-        headers={"Authorization": "Bearer " + TOKEN},
+        apiUrl + "/api/2.1/workspace/list",
+        headers={"Authorization": "Bearer " + apiToken},
         data=json.dumps({"path": path}),
     ).json()
 
