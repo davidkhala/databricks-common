@@ -1,6 +1,6 @@
 import requests
 import json
-from context import *
+from notebook.context import *
 
 
 def get_path(path="/"):
