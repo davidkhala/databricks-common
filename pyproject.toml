@@ -6,18 +6,16 @@ authors = ["David Liu <david-khala@hotmail.com>"]
 license = "MIT"
 readme = "README.md"
 packages = [{ include = "workspace" }, { include = "lineage" }]
-include = [
-    "lineage/*.py",
-]
 
 
 [tool.poetry.dependencies]
 python = "^3.13"
 databricks-sdk = "*"
-davidkhala-utils = "*"
+davidkhala-utils = "0.0.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
+databricks-connect = "*"
 
 [build-system]
 requires = ["poetry-core"]

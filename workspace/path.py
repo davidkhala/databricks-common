@@ -1,0 +1,42 @@
+from workspace import APIClient
+
+
+class WorkspacePath:
+    def __init__(self, api_client: APIClient):
+        self.api_client = api_client
+
+    def ls(self, path="/"):
+        """
+        function to retrieve objects within specified path
+        :param path:
+        :return:
+        """
+        return self.api_client.get('/workspace/list', {'path': path})
+
+    def scan_notebooks(self, path="/"):
+        """
+        Get Notebook Paths
+        :param path:
+        :return:
+        """
+        result = []
+        response = self.ls(path)
+        if "objects" in response:
+            for object_item in response["objects"]:
+                if object_item["object_type"] == "NOTEBOOK":
+                    result.append([object_item["object_id"], object_item["path"]])
+                elif object_item["object_type"] == "DIRECTORY":
+                    result = result + self.scan_notebooks(object_item["path"])
+        return result
+
+
+
+    def index_notebooks(self, spark, GlobalTempView="notebooks_dimension"):
+        """
+        :param spark:
+        :type spark: pyspark.sql.SparkSession
+        :param GlobalTempView:
+        :return:
+        """
+        notebook_dataframe = spark.createDataFrame(self.scan_notebooks(), ["object_id", "path"])
+        notebook_dataframe.createOrReplaceGlobalTempView(GlobalTempView)

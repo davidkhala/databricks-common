@@ -1,7 +1,6 @@
 import unittest
 
-from syntax.format import JSONReadable
-from syntax.fs import write
+from syntax.fs import write_json
 
 from workspace import Workspace
 from workspace.query import Query
@@ -12,7 +11,11 @@ class WorkspaceTest(unittest.TestCase):
     def setUp(self):
         self.w = Workspace()
 
-    def test_workspace(self):
+    def test_client(self):
+        print(self.w.config)
+
+
+    def test_clusters(self):
         clusters = self.w.clusters()
         self.assertGreaterEqual(len(clusters), 0)
 
@@ -35,8 +38,8 @@ class QueryTest(unittest.TestCase):
             where source_table_full_name is not null
               and target_table_full_name is not null        
             """)
+        write_json(r, 'table-lineage')
 
-        write("table-lineage.json", JSONReadable(r))
 
 class TableTest(unittest.TestCase):
     def setUp(self):
@@ -44,4 +47,4 @@ class TableTest(unittest.TestCase):
 
     def test_table_get(self):
         r = self.t.get("azure-open-datasets.nyctlc.yellow")
-        write("azure-open-datasets.nyctlc.yellow.json", JSONReadable(r))
+        write_json(r, "azure-open-datasets.nyctlc.yellow")
