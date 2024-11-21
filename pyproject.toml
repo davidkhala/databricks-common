@@ -5,7 +5,11 @@ description = ""
 authors = ["David Liu <david-khala@hotmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "davidkhala"}]
+packages = [{ include = "workspace" }, { include = "lineage" }]
+include = [
+    "lineage/*.py",
+]
+
 
 [tool.poetry.dependencies]
 python = "^3.13"
