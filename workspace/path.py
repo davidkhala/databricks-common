@@ -1,3 +1,5 @@
+from pyspark.sql.connect.session import SparkSession
+
 from workspace import APIClient
 
 
@@ -29,14 +31,22 @@ class WorkspacePath:
                     result = result + self.scan_notebooks(object_item["path"])
         return result
 
+    defaultNotebookView = "notebooks_dimension"
 
-
-    def index_notebooks(self, spark, GlobalTempView="notebooks_dimension"):
+    def index_notebooks(self, spark: SparkSession, GlobalTempView=defaultNotebookView):
         """
         :param spark:
         :type spark: pyspark.sql.SparkSession
         :param GlobalTempView:
         :return:
         """
+        if not spark:
+            from spark import DatabricksConnect
+            spark = DatabricksConnect().spark
         notebook_dataframe = spark.createDataFrame(self.scan_notebooks(), ["object_id", "path"])
         notebook_dataframe.createOrReplaceGlobalTempView(GlobalTempView)
+
+    @staticmethod
+    def getBy(spark: SparkSession, notebook_id: str, GlobalTempView=defaultNotebookView):
+        _df = spark.sql(f"select path from global_temp.{GlobalTempView} where object_id = {notebook_id}")
+        return _df

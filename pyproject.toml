@@ -11,7 +11,7 @@ packages = [{ include = "workspace" }, { include = "lineage" }]
 [tool.poetry.dependencies]
 python = "^3.13"
 databricks-sdk = "*"
-davidkhala-utils = "0.0.3"
+davidkhala-utils = "0.0.4"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"

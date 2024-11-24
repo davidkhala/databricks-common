@@ -1,9 +1,9 @@
 from databricks.sdk import WorkspaceClient
 
-api_version = '/api/2.0'
-
 
 class Workspace:
+    api_version = '/api/2.0'
+
     def __init__(self):
         self.client = WorkspaceClient()
 
@@ -32,4 +32,4 @@ class APIClient:
         self.client = client.api_client
 
     def get(self, route, data=None):
-        return self.client.do(method='GET', path=api_version + route, body=data)
+        return self.client.do(method='GET', path=Workspace.api_version + route, body=data)
