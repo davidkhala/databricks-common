@@ -17,6 +17,9 @@ davidkhala-utils = "0.0.4"
 pytest = "*"
 databricks-connect = "*"
 
+[tool.poetry.scripts]
+test = "pytest"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
