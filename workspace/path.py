@@ -47,6 +47,6 @@ class WorkspacePath:
         notebook_dataframe.createOrReplaceGlobalTempView(GlobalTempView)
 
     @staticmethod
-    def getBy(spark: SparkSession, notebook_id: str, GlobalTempView=defaultNotebookView):
+    def get_by(spark: SparkSession, notebook_id: str, GlobalTempView=defaultNotebookView):
         _df = spark.sql(f"select path from global_temp.{GlobalTempView} where object_id = {notebook_id}")
         return _df

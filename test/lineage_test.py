@@ -52,7 +52,7 @@ class TestE2E(unittest.TestCase):
         p.index_notebooks(self.spark)
 
     def test_start(self):
-        r = WorkspacePath.getBy(self.spark, '1617821168848677')
+        r = WorkspacePath.get_by(self.spark, '1617821168848677')
         print(r)
 
 
