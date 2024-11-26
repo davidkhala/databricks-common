@@ -5,7 +5,7 @@ login() {
   local url=$1 # workspace url. in format of `adb-662901427557763.3.azuredatabricks.net`
   local pat=$2 # Personal access token
 
-  databricks configure --token --host https://$url <<<$pat
+  databricks configure --configure-cluster --token --host https://$url <<<$pat
 }
 logout() {
   rm ~/.databrickscfg

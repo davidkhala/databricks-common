@@ -7,20 +7,25 @@ from spark import DatabricksConnect
 
 class TestDatabricksConnect(unittest.TestCase):
     def setUp(self):
-        self.spark = DatabricksConnect().spark
-        s = self.spark.getActiveSession()
+        connect = DatabricksConnect()
+        s = connect.spark.getActiveSession()
         self.assertIsNotNone(s)
 
     def test_create_DF(self):
+        connect = DatabricksConnect(serverless=True)
+        data = [
+            (1, "Alice", 29),
+        ]
+        columns = ["id", "name", "age"]
         with self.assertRaises(Exception):
-            data = [
-                (1, "Alice", 29),
-            ]
-            columns = ["id", "name", "age"]
-            self.spark.createDataFrame(data, columns)
+            connect.createDataFrame(data, columns)
+
+        connect = DatabricksConnect()
+        connect.createDataFrame(data, columns)
 
     def test_query(self):
-        self.spark.sql('select 1 ')
+        connect = DatabricksConnect()
+        connect.run('select 1 ')
 
 
 if __name__ == '__main__':

@@ -29,7 +29,7 @@ class TestRest(unittest.TestCase):
             print(c_l)
 
 
-class TestQuery(unittest.TestCase):
+class TestLineage(unittest.TestCase):
     def setUp(self):
         warehouse = '/sql/1.0/warehouses/7969d92540da7f02'
         self.t = TableLineage(w.client, warehouse)
@@ -44,16 +44,26 @@ class TestQuery(unittest.TestCase):
         write_json(c, "all-column-lineage")
 
 
+class TestQuery(unittest.TestCase):
+    def test_run(self):
+        w.spark.sql('select 1')
+
+
+
 class TestE2E(unittest.TestCase):
 
     def setUp(self):
-        self.spark = DatabricksConnect().spark
+        self.spark = w.spark
+
         p = WorkspacePath(w.api_client)
         p.index_notebooks(self.spark)
 
     def test_start(self):
         r = WorkspacePath.get_by(self.spark, '1617821168848677')
         print(r)
+
+    def tearDown(self):
+        w.connection.disconnect()
 
 
 if __name__ == '__main__':

@@ -15,7 +15,7 @@ class WorkspacePath:
         """
         return self.api_client.get('/workspace/list', {'path': path})
 
-    def scan_notebooks(self, path="/"):
+    def scan_notebooks(self, path="/") -> list:
         """
         Get Notebook Paths
         :param path:
@@ -33,17 +33,24 @@ class WorkspacePath:
 
     defaultNotebookView = "notebooks_dimension"
 
-    def index_notebooks(self, spark: SparkSession, GlobalTempView=defaultNotebookView):
+    def index_notebooks(self, spark: SparkSession, GlobalTempView=defaultNotebookView) -> bool:
         """
         :param spark:
         :type spark: pyspark.sql.SparkSession
         :param GlobalTempView:
-        :return:
+        :return: True if found any notebooks, False otherwise
         """
-        notebook_dataframe = spark.createDataFrame(self.scan_notebooks(), ["object_id", "path"])
+        _notebooks = self.scan_notebooks()
+        if len(_notebooks) == 0:
+            return False
+        notebook_dataframe = spark.createDataFrame(_notebooks, ["object_id", "path"])
         notebook_dataframe.createOrReplaceGlobalTempView(GlobalTempView)
+        return True
 
     @staticmethod
     def get_by(spark: SparkSession, notebook_id: str, GlobalTempView=defaultNotebookView):
-        _df = spark.sql(f"select path from global_temp.{GlobalTempView} where object_id = {notebook_id}")
-        return _df
+        _full_name = 'global_temp.' + GlobalTempView
+        if spark.catalog.tableExists(_full_name):
+            _df = spark.sql(f"select path from {_full_name} where object_id = {notebook_id}")
+            return _df
+        return

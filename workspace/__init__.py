@@ -1,8 +1,10 @@
 from databricks.sdk import WorkspaceClient
+from pyspark.sql import SparkSession
 
 
 class Workspace:
     api_version = '/api/2.0'
+    connection = None
 
     def __init__(self):
         self.client = WorkspaceClient()
@@ -18,10 +20,17 @@ class Workspace:
         """
         return self.client.config.as_dict()
 
-    @property
-    def spark(self):
+    def connect(self):
         from spark import DatabricksConnect
-        return DatabricksConnect.from_config(self.client.config)
+        if self.connection:
+            self.connection.close()
+        self.connection = DatabricksConnect.from_config(self.client.config)
+
+    @property
+    def spark(self) -> SparkSession:
+        if self.connection is None:
+            self.connect()
+        return self.connection.spark
 
     @property
     def cloud(self):
@@ -45,6 +54,10 @@ class Workspace:
     @property
     def api_client(self):
         return APIClient(self.client)
+
+    def __del__(self):
+        if self.connection:
+            self.connection.disconnect()
 
 
 class APIClient:

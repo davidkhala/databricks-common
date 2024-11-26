@@ -22,7 +22,7 @@ class WorkspaceTest(unittest.TestCase):
 
 class QueryTest(unittest.TestCase):
     def setUp(self):
-        warehouse = '/sql/1.0/warehouses/7969d92540da7f02'
+        warehouse = '/sql/1.0/warehouses/284d94956aa8f5c0'
         self.q = Query(Workspace().client, warehouse)
 
     def test_query(self):
