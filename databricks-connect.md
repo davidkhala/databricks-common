@@ -1,7 +1,7 @@
 # pip `databricks-connect`
 
 ```
-databricks configure 
+databricks configure --configure-cluster
 ```
 ## Inline run
 ```shell
