@@ -19,6 +19,26 @@ class Workspace:
         return self.client.config.as_dict()
 
     @property
+    def spark(self):
+        from spark import DatabricksConnect
+        return DatabricksConnect.from_config(self.client.config)
+
+    @property
+    def cloud(self):
+        token: str = self.config.get('token')
+        if token is not None:
+
+            if token.startswith('https://adb-') and token.endswith('.azuredatabricks.net'):
+                # adb-662901427557763.3.azuredatabricks.net
+                return 'azure'
+            elif token.startswith('https://dbc-') and token.endswith('.cloud.databricks.com'):
+                # dbc-8df7b30e-676a.cloud.databricks.com
+                return "aws"
+            elif token.endswith('.gcp.databricks.com'):
+                # 1105010096141051.1.gcp.databricks.com
+                return "gcp"
+
+    @property
     def dbutils(self):
         return self.client.dbutils
 

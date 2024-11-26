@@ -40,9 +40,6 @@ class WorkspacePath:
         :param GlobalTempView:
         :return:
         """
-        if not spark:
-            from spark import DatabricksConnect
-            spark = DatabricksConnect().spark
         notebook_dataframe = spark.createDataFrame(self.scan_notebooks(), ["object_id", "path"])
         notebook_dataframe.createOrReplaceGlobalTempView(GlobalTempView)
 
