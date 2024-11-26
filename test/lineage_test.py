@@ -48,6 +48,8 @@ class TestQuery(unittest.TestCase):
     def test_run(self):
         w.spark.sql('select 1')
 
+    def tearDown(self):
+        w.disconnect()
 
 
 class TestE2E(unittest.TestCase):

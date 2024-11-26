@@ -55,7 +55,7 @@ class Workspace:
     def api_client(self):
         return APIClient(self.client)
 
-    def __del__(self):
+    def disconnect(self):
         if self.connection:
             self.connection.disconnect()
 
