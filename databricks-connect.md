@@ -1,8 +1,8 @@
 # pip `databricks-connect`
 
-```
-databricks configure --configure-cluster
-```
+prerequisite
+- login already 
+
 ## Inline run
 ```shell
 pip install pipx

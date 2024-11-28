@@ -1,4 +1,5 @@
 from databricks.sdk import WorkspaceClient
+from databricks.sdk.config import Config
 from pyspark.sql import SparkSession
 
 
@@ -13,18 +14,18 @@ class Workspace:
         return list(self.client.clusters.list())
 
     @property
-    def config(self) -> dict:
+    def config(self) -> Config:
         """
         It returns raw token content. TAKE CARE for secret leakage.
         :return: {'host':'https://adb-662901427557763.3.azuredatabricks.net', 'token':'', 'auth_type':'pat'}
         """
-        return self.client.config.as_dict()
+        return self.client.config
 
     def connect(self):
         from spark import DatabricksConnect
         if self.connection:
             self.connection.close()
-        self.connection = DatabricksConnect.from_config(self.client.config)
+        self.connection = DatabricksConnect.from_config(self.config)
 
     @property
     def spark(self) -> SparkSession:
@@ -34,7 +35,7 @@ class Workspace:
 
     @property
     def cloud(self):
-        token: str = self.config.get('token')
+        token: str = self.config.token
         if token is not None:
 
             if token.startswith('https://adb-') and token.endswith('.azuredatabricks.net'):

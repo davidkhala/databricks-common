@@ -3,29 +3,32 @@ import unittest
 from databricks.connect import DatabricksSession  # type: ignore
 
 from spark import DatabricksConnect
+from workspace import Workspace
 
 
 class TestDatabricksConnect(unittest.TestCase):
-    def setUp(self):
-        connect = DatabricksConnect()
-        s = connect.spark.getActiveSession()
-        self.assertIsNotNone(s)
+    data = [
+        (1, "Alice", 29),
+    ]
+    columns = ["id", "name", "age"]
+    config = Workspace().config
 
     def test_create_DF(self):
-        connect = DatabricksConnect(serverless=True)
-        data = [
-            (1, "Alice", 29),
-        ]
-        columns = ["id", "name", "age"]
-        with self.assertRaises(Exception):
-            connect.createDataFrame(data, columns)
-
         connect = DatabricksConnect()
-        connect.createDataFrame(data, columns)
+        connect.createDataFrame(self.data, self.columns)
+        connect.disconnect()
 
     def test_query(self):
         connect = DatabricksConnect()
         connect.run('select 1 ')
+        connect.disconnect()
+
+    def test_warehouse_query(self):
+        connect = DatabricksConnect()
+        connect.run('select 1')
+        with self.assertRaises(Exception):
+            connect.createDataFrame(self.data, self.columns)
+        connect.disconnect()
 
 
 if __name__ == '__main__':

@@ -47,21 +47,29 @@ class TestLineage(unittest.TestCase):
 class TestQuery(unittest.TestCase):
     def test_run(self):
         w.spark.sql('select 1')
+        # GTV created by notebook cluster can be access by another session
+        _sql = 'select * from global_temp.notebooks_dimension'
+        df = w.spark.sql(_sql)
+        df.show()
+
+
+        warehouse_connect = DatabricksConnect(serverless=True, host=w.config.host, token=w.config.token)
+        # GTV created by notebook cluster cannot be access by SQL warehouse
+        warehouse_connect.run(_sql)
 
     def tearDown(self):
         w.disconnect()
 
 
 class TestE2E(unittest.TestCase):
+    spark = w.spark
+    p = WorkspacePath(w.api_client)
 
     def setUp(self):
-        self.spark = w.spark
-
-        p = WorkspacePath(w.api_client)
-        p.index_notebooks(self.spark)
+        self.p.index_notebooks(self.spark)
 
     def test_start(self):
-        r = WorkspacePath.get_by(self.spark, '1617821168848677')
+        r = WorkspacePath.get_by(self.p, self.spark, notebook_id='918032188629039')
         print(r)
 
     def tearDown(self):
