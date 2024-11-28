@@ -1,9 +1,14 @@
+from typing import Iterator
+
+from databricks.sdk import WorkspaceExt
+from databricks.sdk.service.workspace import ObjectInfo, ObjectType
 from pyspark.sql.connect.session import SparkSession
 
-from workspace import APIClient
+from common import DatabricksConnect
+from workspace import APIClient, Workspace
 
 
-class WorkspacePath:
+class API:
     def __init__(self, api_client: APIClient):
         self.api_client = api_client
 
@@ -31,37 +36,75 @@ class WorkspacePath:
                     result = result + self.scan_notebooks(object_item["path"])
         return result
 
-    notebookView = "notebooks_dimension"
+
+class SDK:
+    def __init__(self, w: WorkspaceExt):
+        self.workspace = w
+
+    @staticmethod
+    def from_workspace(w: Workspace):
+        return SDK(w.client.workspace)
+
+    def ls(self, path="/") -> Iterator[ObjectInfo]:
+        return self.workspace.list(path, recursive=True)
+
+    def get_by(self, *, notebook_id: str | int = None, path: str = None) -> str | None:
+        for o in self.ls():
+            if o.object_type == ObjectType.NOTEBOOK:
+                if notebook_id:
+                    if o.object_id == int(notebook_id):
+                        return o.path
+                if path is not None:
+                    if path in o.path:
+                        return str(o.object_id)
+
+
+class NotebookIndex:
+    notebook_name = "notebooks_dimension"
+
+    def __init__(self, spark: SparkSession):
+        self.spark = spark
+        _d = DatabricksConnect(spark)
+        self.serverless = _d.serverless
+        if self.serverless:
+            self.schema = _d.schema
 
     @property
-    def notebook_gtv(self):
+    def notebook_full_name(self):
         """
-        full name of notebook dimension GlobalTempView
+        full name of notebook dimension GlobalTempView or Table
         :return:
         """
-        return 'global_temp.' + self.notebookView
 
-    def index_notebooks(self, spark: SparkSession) -> bool:
+        return f"{self.schema}.{self.notebook_name}" if self.serverless else f"global_temp.{self.notebook_name}"
+
+    def build(self, api: API) -> bool:
         """
-        :param spark:
-        :type spark: pyspark.sql.SparkSession
         :return: True if found any notebooks, False otherwise
         """
-        _notebooks = self.scan_notebooks()
+        _notebooks = api.scan_notebooks()
         if len(_notebooks) == 0:
             return False
-        notebook_dataframe = spark.createDataFrame(_notebooks, ["object_id", "path"])
-        notebook_dataframe.createOrReplaceGlobalTempView(self.notebookView)
+        notebook_dataframe = self.spark.createDataFrame(_notebooks, ["object_id", "path"])
+        if self.serverless:
+            notebook_dataframe.writeTo(self.notebook_full_name).createOrReplace()
+        else:
+            notebook_dataframe.createOrReplaceGlobalTempView(self.notebook_name)
         return True
 
-    def get_by(self, spark: SparkSession, *, notebook_id: str = None, path: str = None):
-        if spark.catalog.tableExists(self.notebook_gtv):
+    def show(self):
+        self.spark.sql(f"select * from {self.notebook_full_name}").show()
+
+    def get_by(self, *, notebook_id: str = None, path: str = None):
+        if self.spark.catalog.tableExists(self.notebook_full_name):
             if path:
-                _any = spark.sql(f"select object_id from {self.notebook_gtv} where path LIKE '%{path}%'").first()
+                _any = self.spark.sql(
+                    f"select object_id from {self.notebook_full_name} where path LIKE '%{path}%'").first()
                 if _any:
                     return _any.object_id
             elif notebook_id:
-                _any = spark.sql(f"select path from {self.notebook_gtv} where object_id = {notebook_id}").first()
+                _any = self.spark.sql(
+                    f"select path from {self.notebook_full_name} where object_id = {notebook_id}").first()
                 if _any:
                     return _any.path
 

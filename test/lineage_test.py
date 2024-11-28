@@ -3,18 +3,18 @@ import unittest
 from syntax.fs import write_json
 
 from lineage import Table as TableLineage, Column as ColumnLineage
-from lineage.rest import API
-from spark import DatabricksConnect
+from lineage.rest import API as RESTAPI
 from workspace import Workspace
-from workspace.path import WorkspacePath
+from workspace.path import SDK as PATHSDK, NotebookIndex
 from workspace.table import Table
+from workspace.warehouse import Warehouse
 
 w = Workspace()
 
 
 class TestRest(unittest.TestCase):
     def setUp(self):
-        self.api = API(w.api_client)
+        self.api = RESTAPI(w.api_client)
         self.t = Table(w.client)
 
     def test_API_lineage(self):
@@ -31,8 +31,9 @@ class TestRest(unittest.TestCase):
 
 class TestLineage(unittest.TestCase):
     def setUp(self):
-        warehouse = '/sql/1.0/warehouses/7969d92540da7f02'
-        self.t = TableLineage(w.client, warehouse)
+        http_path = '/sql/1.0/warehouses/f74f8ec14f4e81fa'
+        warehouse = Warehouse(w.client, http_path)
+        self.t = TableLineage(w.client)
         self.c = ColumnLineage(w.client, warehouse)
 
     def test_table_lineage(self):
@@ -44,36 +45,13 @@ class TestLineage(unittest.TestCase):
         write_json(c, "all-column-lineage")
 
 
-class TestQuery(unittest.TestCase):
-    def test_run(self):
-        w.spark.sql('select 1')
-        # GTV created by notebook cluster can be access by another session
-        _sql = 'select * from global_temp.notebooks_dimension'
-        df = w.spark.sql(_sql)
-        df.show()
-
-
-        warehouse_connect = DatabricksConnect(serverless=True, host=w.config.host, token=w.config.token)
-        # GTV created by notebook cluster cannot be access by SQL warehouse
-        warehouse_connect.run(_sql)
-
-    def tearDown(self):
-        w.disconnect()
-
-
 class TestE2E(unittest.TestCase):
-    spark = w.spark
-    p = WorkspacePath(w.api_client)
-
+    s = PATHSDK.from_workspace(w)
     def setUp(self):
-        self.p.index_notebooks(self.spark)
-
+        i = NotebookIndex(w)
     def test_start(self):
-        r = WorkspacePath.get_by(self.p, self.spark, notebook_id='918032188629039')
+        r = self.s.get_by(notebook_id=918032188629039)
         print(r)
-
-    def tearDown(self):
-        w.connection.disconnect()
 
 
 if __name__ == '__main__':

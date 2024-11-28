@@ -5,7 +5,7 @@ description = ""
 authors = ["David Liu <david-khala@hotmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{ include = "workspace" }, { include = "lineage" }]
+packages = [{ include = "workspace" }, { include = "lineage" }, { include = "common" }]
 
 
 [tool.poetry.dependencies]

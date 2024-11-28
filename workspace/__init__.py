@@ -1,11 +1,8 @@
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.config import Config
-from pyspark.sql import SparkSession
 
 
 class Workspace:
-    api_version = '/api/2.0'
-    connection = None
 
     def __init__(self):
         self.client = WorkspaceClient()
@@ -21,17 +18,9 @@ class Workspace:
         """
         return self.client.config
 
-    def connect(self):
-        from spark import DatabricksConnect
-        if self.connection:
-            self.connection.close()
-        self.connection = DatabricksConnect.from_config(self.config)
-
     @property
-    def spark(self) -> SparkSession:
-        if self.connection is None:
-            self.connect()
-        return self.connection.spark
+    def config_token(self):
+        return self.config.as_dict().get('token')
 
     @property
     def cloud(self):
@@ -56,14 +45,12 @@ class Workspace:
     def api_client(self):
         return APIClient(self.client)
 
-    def disconnect(self):
-        if self.connection:
-            self.connection.disconnect()
-
 
 class APIClient:
+    api_version = '/api/2.0'
+
     def __init__(self, client: WorkspaceClient):
         self.client = client.api_client
 
     def get(self, route, data=None):
-        return self.client.do(method='GET', path=Workspace.api_version + route, body=data)
+        return self.client.do(method='GET', path=self.api_version + route, body=data)

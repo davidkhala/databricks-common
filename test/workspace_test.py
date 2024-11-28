@@ -2,8 +2,8 @@ import unittest
 
 from syntax.fs import write_json
 
-from workspace import Workspace
-from workspace.query import Query
+from workspace import Workspace, path
+from workspace.warehouse import Warehouse
 from workspace.table import Table
 
 
@@ -12,18 +12,22 @@ class WorkspaceTest(unittest.TestCase):
         self.w = Workspace()
 
     def test_client(self):
-        print(self.w.config)
+        print(self.w.config_token)
 
+    def test_SDK(self):
+        s = path.SDK.from_workspace(self.w)
+        self.assertEqual(s.get_by(notebook_id='918032188629039'), '/Shared/context')
+        self.assertEqual(s.get_by(path='context'), '918032188629039')
 
     def test_clusters(self):
         clusters = self.w.clusters()
         self.assertGreaterEqual(len(clusters), 0)
 
 
-class QueryTest(unittest.TestCase):
+class WarehouseTest(unittest.TestCase):
     def setUp(self):
         warehouse = '/sql/1.0/warehouses/284d94956aa8f5c0'
-        self.q = Query(Workspace().client, warehouse)
+        self.q = Warehouse(Workspace().client, warehouse)
 
     def test_query(self):
         r = self.q.run(

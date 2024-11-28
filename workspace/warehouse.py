@@ -2,7 +2,7 @@ from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.sql import StatementState, StatementResponse
 
 
-class Query:
+class Warehouse:
     def __init__(self, client: WorkspaceClient, http_path: str):
         """
         :param client:
@@ -16,7 +16,7 @@ class Query:
 
     def run(self, query: str):
         r = self.run_async(query)
-        return Query.pretty(self.wait_until_statement_success(r))
+        return Warehouse.pretty(self.wait_until_statement_success(r))
 
     def wait_until_statement_success(self, r: StatementResponse):
         _r = self.client.statement_execution.get_statement(r.statement_id)
