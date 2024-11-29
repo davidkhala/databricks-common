@@ -1,5 +1,5 @@
 function install(){
-    winget install --accept-package-agreements Databricks.DatabricksCLI
+    winget install --accept-source-agreements Databricks.DatabricksCLI
 }
 
 function logout(){

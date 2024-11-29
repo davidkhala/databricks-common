@@ -26,11 +26,17 @@ class WorkspaceTest(unittest.TestCase):
 
 class WarehouseTest(unittest.TestCase):
     def setUp(self):
-        warehouse = '/sql/1.0/warehouses/284d94956aa8f5c0'
-        self.q = Warehouse(Workspace().client, warehouse)
+        warehouse = '/sql/1.0/warehouses/f74f8ec14f4e81fa'
+        self.w = Warehouse(Workspace().client, warehouse)
+
+    def test_active(self):
+        self.w.activate()
+
+    def test_stop(self):
+        self.w.stop()
 
     def test_query(self):
-        r = self.q.run(
+        r = self.w.run(
             """
             select entity_type,
                    entity_id,

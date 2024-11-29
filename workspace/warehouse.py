@@ -19,10 +19,17 @@ class Warehouse:
         return Warehouse.pretty(self.wait_until_statement_success(r))
 
     def wait_until_statement_success(self, r: StatementResponse):
-        _r = self.client.statement_execution.get_statement(r.statement_id)
-        if _r.status.state == StatementState.PENDING:
-            return self.wait_until_statement_success(r)
-        return _r
+        if r.status.state == StatementState.PENDING:
+            next_response = self.client.statement_execution.get_statement(r.statement_id)
+            return self.wait_until_statement_success(next_response)
+        assert r.status.state == StatementState.SUCCEEDED
+        return r
+
+    def activate(self):
+        return self.client.warehouses.start_and_wait(self.warehouse_id)
+
+    def stop(self):
+        return self.client.warehouses.stop_and_wait(self.warehouse_id)
 
     @staticmethod
     def pretty(r: StatementResponse):
