@@ -1,10 +1,16 @@
+import pathlib
+
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.config import Config
+
+from common import CONFIG_PATH
 
 
 class Workspace:
 
     def __init__(self):
+        if not pathlib.Path(CONFIG_PATH).exists():
+            raise FileNotFoundError(CONFIG_PATH + " does not exist")
         self.client = WorkspaceClient()
 
     def clusters(self):

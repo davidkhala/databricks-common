@@ -16,6 +16,8 @@ davidkhala-utils = "*"
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
 databricks-connect = "*"
+numpy= "^2"
+setuptools= "*"
 
 [tool.poetry.scripts]
 test = "pytest:main"
