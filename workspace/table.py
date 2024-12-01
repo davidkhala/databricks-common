@@ -6,6 +6,9 @@ from syntax.js import Array
 
 
 class Table:
+    """
+    NOTE: table create is not supported by SDK. Use dataframe instead.
+    """
     def __init__(self, client: WorkspaceClient):
         self.client = client
 

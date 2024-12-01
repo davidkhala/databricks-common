@@ -27,8 +27,7 @@ class TestDatabricksConnect(unittest.TestCase):
         spark.stop()
 
     def test_ping(self):
-        os.environ['DATABRICKS_SERVERLESS_COMPUTE_ID'] = 'auto'
-        DatabricksConnect.ping()
+        DatabricksConnect.ping(True)
 
     def test_serverless(self):
         spark = DatabricksConnect.from_serverless(self.config)

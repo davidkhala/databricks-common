@@ -1,3 +1,5 @@
+import os
+
 from databricks.connect import DatabricksSession, cli
 from databricks.sdk.config import Config
 from pyspark.sql import SparkSession
@@ -11,12 +13,21 @@ class DatabricksConnect:
         self.spark: SparkSession = spark
 
     @staticmethod
-    def ping():
+    def ping(serverless: bool = False):
+        if serverless:
+            os.environ['DATABRICKS_SERVERLESS_COMPUTE_ID'] = 'auto'
         cli.test()
 
     @staticmethod
     def get() -> SparkSession:
-        return DatabricksSession.builder.validateSession(True).getOrCreate()
+        _builder = DatabricksSession.builder
+        try:
+            return _builder.validateSession(True).getOrCreate()
+        except Exception as e:
+            if str(e) == 'Cluster id or serverless are required but were not specified.':
+                return _builder.serverless(True).getOrCreate()
+            else:
+                raise e
 
     @staticmethod
     def from_servermore(config: Config) -> SparkSession:
@@ -53,6 +64,7 @@ class DatabricksConnect:
     @property
     def conf(self) -> dict:
         return self.spark.conf.getAll
+
 
 CONFIG_PATH = home_resolve('.databrickscfg')
 import pathlib
