@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from databricks.connect import DatabricksSession  # type: ignore
@@ -22,12 +23,18 @@ class TestDatabricksConnect(unittest.TestCase):
         spark = DatabricksConnect.get()
         spark.sql('select 1')
         spark.createDataFrame(self.data, self.columns)
+
         spark.stop()
+
+    def test_ping(self):
+        os.environ['DATABRICKS_SERVERLESS_COMPUTE_ID'] = 'auto'
+        DatabricksConnect.ping()
 
     def test_serverless(self):
         spark = DatabricksConnect.from_serverless(self.config)
         spark.sql('select 1')
         spark.createDataFrame(self.data, self.columns)
+        #
         d = DatabricksConnect(spark)
         self.assertTrue(d.serverless)
         spark.stop()

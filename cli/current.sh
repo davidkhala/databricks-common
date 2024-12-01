@@ -11,4 +11,4 @@ user() {
     databricks current-user me
 }
 
-$@
+"$@"

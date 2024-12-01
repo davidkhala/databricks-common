@@ -1,4 +1,4 @@
-from databricks.connect import DatabricksSession
+from databricks.connect import DatabricksSession, cli
 from databricks.sdk.config import Config
 from pyspark.sql import SparkSession
 from syntax.path import home_resolve
@@ -9,6 +9,10 @@ class DatabricksConnect:
 
     def __init__(self, spark):
         self.spark: SparkSession = spark
+
+    @staticmethod
+    def ping():
+        cli.test()
 
     @staticmethod
     def get() -> SparkSession:
@@ -49,7 +53,6 @@ class DatabricksConnect:
     @property
     def conf(self) -> dict:
         return self.spark.conf.getAll
-
 
 CONFIG_PATH = home_resolve('.databrickscfg')
 import pathlib

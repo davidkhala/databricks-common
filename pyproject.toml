@@ -15,9 +15,7 @@ davidkhala-utils = "*"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
-databricks-connect = "*"
-numpy= "^2" # fix issue up to databricks-connect:15.4.3
-setuptools= "*" # for `No module named 'distutils'`
+databricks-connect = "^15"
 
 [tool.poetry.scripts]
 test = "pytest:main"
