@@ -1,4 +1,5 @@
-# pip `databricks-connect`
+# [pip `databricks-connect`](https://pypi.org/project/databricks-connect/)
+- `databricks-connect` is not open source.
 
 prerequisite
 - login already 

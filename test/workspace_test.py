@@ -13,6 +13,8 @@ class WorkspaceTest(unittest.TestCase):
 
     def test_client(self):
         print(self.w.config_token)
+        self.w.client.catalogs.create('test')
+        self.w.client.catalogs.delete('test')
 
     def test_SDK(self):
         s = path.SDK.from_workspace(self.w)
