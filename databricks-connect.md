@@ -3,7 +3,8 @@
 
 prerequisite
 - login already 
-- Its dependency numpy `1.26.4` requires g++
+- Its dependency numpy `1.26.4` requires g++ for local build
+  
 ## Inline test run
 ```shell
 pip install pipx
