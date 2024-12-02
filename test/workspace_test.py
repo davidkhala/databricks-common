@@ -3,6 +3,7 @@ import unittest
 from syntax.fs import write_json
 
 from workspace import Workspace, path
+from workspace.catalog import Catalog
 from workspace.warehouse import Warehouse
 from workspace.table import Table
 
@@ -13,8 +14,6 @@ class WorkspaceTest(unittest.TestCase):
 
     def test_client(self):
         print(self.w.config_token)
-        self.w.client.catalogs.create('test')
-        self.w.client.catalogs.delete('test')
 
     def test_SDK(self):
         s = path.SDK.from_workspace(self.w)
@@ -60,3 +59,14 @@ class TableTest(unittest.TestCase):
     def test_table_get(self):
         r = self.t.get("azure-open-datasets.nyctlc.yellow")
         write_json(r, "azure-open-datasets.nyctlc.yellow")
+
+
+class CatalogTest(unittest.TestCase):
+    def setUp(self):
+        self.c = Catalog(Workspace())
+
+    def test_create(self):
+        self.c.create('test')
+
+    def test_delete(self):
+        self.c.delete('test')

@@ -7,6 +7,9 @@
 
 # COMMAND ----------
 
+# MAGIC %sh python --version
+
+# COMMAND ----------
 from databricks.sdk.runtime import dbutils, display, spark
 
 Context = dbutils.notebook.entry_point.getDbutils().notebook().getContext()

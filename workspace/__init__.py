@@ -8,10 +8,12 @@ from common import CONFIG_PATH
 
 class Workspace:
 
-    def __init__(self):
+    def __init__(self, client: WorkspaceClient = None):
         if not pathlib.Path(CONFIG_PATH).exists():
             raise FileNotFoundError(CONFIG_PATH + " does not exist")
-        self.client = WorkspaceClient()
+        if client is None:
+            client = WorkspaceClient()
+        self.client = client
 
     def clusters(self):
         return list(self.client.clusters.list())
@@ -29,6 +31,13 @@ class Workspace:
         return self.config.as_dict().get('token')
 
     @property
+    def catalog(self) -> str:
+        """
+        :return: default catalog name
+        """
+        return self.client.settings.default_namespace.get().namespace.value
+
+    @property
     def cloud(self):
         token: str = self.config.token
         if token is not None:
@@ -42,6 +51,13 @@ class Workspace:
             elif token.endswith('.gcp.databricks.com'):
                 # 1105010096141051.1.gcp.databricks.com
                 return "gcp"
+
+    @property
+    def metastore(self):
+        """
+        :return: current metastore
+        """
+        return self.client.metastores.current()
 
     @property
     def dbutils(self):
