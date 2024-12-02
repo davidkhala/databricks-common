@@ -7,9 +7,13 @@
 # Import another notebook
 [Run a Databricks notebook from another notebook](https://docs.databricks.com/en/notebooks/notebook-workflows.html)
 
+## `dbutils.import_notebook()`
+> Importing notebooks directly (import azure_open_datasets.index) is not supported. Use dbutils.import_notebook("azure_open_datasets.index") instead.
+- No document page found
+
 ## `%run` command
 The simplest way to reuse
-- Similar to `#include`, `import * from ...`/`require()` in JS
+- same with `dbutils.import_notebook()`
 - When you use %run, the called notebook is immediately executed.
 - It will not starts a new job
 - In order to pass parameters
