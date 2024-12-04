@@ -28,3 +28,20 @@ def load(year='2024', month='09', catalog: str = None, volume: str = None):
         if catalog:
             full_name = f"{catalog}.{full_name}"
         df.write.saveAsTable(full_name)
+
+
+# TODO wasbs works, but http cannot work
+# Azure Blob Storage access info
+blob_account_name = "azureopendatastorage"
+blob_container_name = "nyctlc"
+blob_relative_path = "yellow"
+
+# blob_sas_token = "add your SAS token here"
+# Construct the path for connection
+wasbs_path = f'wasbs://{blob_container_name}@{blob_account_name}.blob.core.windows.net/{blob_relative_path}'
+
+# Read parquet data from Azure Blob Storage path
+blob_df = spark.read.parquet(wasbs_path)
+
+# Display the Azure Blob DataFrame
+display(blob_df)
