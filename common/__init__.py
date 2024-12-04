@@ -3,10 +3,12 @@ import os
 from databricks.connect import DatabricksSession, cli
 from databricks.sdk.config import Config
 from pyspark.sql import SparkSession
-from syntax.path import home_resolve
 
 
 class DatabricksConnect:
+    """
+    "Attribute `sparkContext` is not supported in Spark Connect as it depends on the JVM."
+    """
     spark: SparkSession
 
     def __init__(self, spark):
@@ -66,9 +68,3 @@ class DatabricksConnect:
         return self.spark.conf.getAll
 
 
-CONFIG_PATH = home_resolve('.databrickscfg')
-import pathlib
-
-
-def logout():
-    pathlib.Path(CONFIG_PATH).unlink(True)

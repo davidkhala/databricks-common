@@ -4,7 +4,8 @@ import unittest
 from databricks.connect import DatabricksSession  # type: ignore
 from syntax.fs import write_json
 
-from common import DatabricksConnect, CONFIG_PATH, logout
+from common import DatabricksConnect, CONFIG_PATH
+from common.local import logout
 from workspace import Workspace
 
 
@@ -13,7 +14,7 @@ class TestDatabricksConnect(unittest.TestCase):
         (1, "Alice", 29),
     ]
     columns = ["id", "name", "age"]
-    config = Workspace().config
+    config = Workspace.from_local().config
 
     def setUp(self):
         print(self.config)

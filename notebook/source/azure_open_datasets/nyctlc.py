@@ -1,18 +1,19 @@
 import urllib
 
-from databricks.sdk.runtime import spark
+from databricks.sdk.runtime import spark, display
 
 schema = 'nyctlc'
 
 
-def load(year='2024', month='09', catalog: str = None, volume: str = None):
+def load_http(year='2024', month='09', catalog: str = None, volume: str = None):
     tables = ['yellow', 'green', 'fhv', 'fhvhv']
     _dir = "/tmp"
 
     if catalog:
-        spark.sql(f"CREATE CATALOG IF NOT EXISTS {catalog}")
-        spark.sql(f"USE {catalog}")
-        # TODO Metastore storage root URL does not exist. Please provide a storage location for the catalog
+        from workspace import Workspace
+        from workspace.catalog import Catalog
+        Catalog(Workspace()).create(catalog)
+
     spark.sql(f"CREATE SCHEMA IF NOT EXISTS {schema}")
     if volume and catalog:
         _dir = f"/Volumes/{catalog}/{schema}/{volume}"
@@ -29,19 +30,20 @@ def load(year='2024', month='09', catalog: str = None, volume: str = None):
             full_name = f"{catalog}.{full_name}"
         df.write.saveAsTable(full_name)
 
+def load():
 
-# TODO wasbs works, but http cannot work
-# Azure Blob Storage access info
-blob_account_name = "azureopendatastorage"
-blob_container_name = "nyctlc"
-blob_relative_path = "yellow"
+    # Azure Blob Storage access info
+    blob_account_name = "azureopendatastorage"
+    blob_container_name = "nyctlc"
+    blob_relative_paths = ["yellow"]
 
-# blob_sas_token = "add your SAS token here"
-# Construct the path for connection
-wasbs_path = f'wasbs://{blob_container_name}@{blob_account_name}.blob.core.windows.net/{blob_relative_path}'
+    for blob_relative_path in blob_relative_paths:
 
-# Read parquet data from Azure Blob Storage path
-blob_df = spark.read.parquet(wasbs_path)
+        # abfss cannot work due to missing required config
+        # https cannot work
+        wasbs_path = f'wasbs://{blob_container_name}@{blob_account_name}.blob.core.windows.net/{blob_relative_path}'
 
-# Display the Azure Blob DataFrame
-display(blob_df)
+        # Read parquet data from Azure Blob Storage path
+        blob_df = spark.read.parquet(wasbs_path)
+        display(blob_df)
+

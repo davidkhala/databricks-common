@@ -3,32 +3,32 @@ import unittest
 from syntax.fs import write_json
 
 from workspace import Workspace, path
-from workspace.catalog import Catalog
+from workspace.catalog import Catalog, Schema
 from workspace.warehouse import Warehouse
 from workspace.table import Table
 
+w = Workspace.from_local()
+
 
 class WorkspaceTest(unittest.TestCase):
-    def setUp(self):
-        self.w = Workspace()
 
     def test_client(self):
-        print(self.w.config_token)
+        print(w.config_token)
 
     def test_SDK(self):
-        s = path.SDK.from_workspace(self.w)
+        s = path.SDK.from_workspace(w)
         self.assertEqual(s.get_by(notebook_id='918032188629039'), '/Shared/context')
         self.assertEqual(s.get_by(path='context'), '918032188629039')
 
     def test_clusters(self):
-        clusters = self.w.clusters()
+        clusters = w.clusters()
         self.assertGreaterEqual(len(clusters), 0)
 
 
 class WarehouseTest(unittest.TestCase):
     def setUp(self):
         warehouse = '/sql/1.0/warehouses/f74f8ec14f4e81fa'
-        self.w = Warehouse(Workspace().client, warehouse)
+        self.w = Warehouse(w.client, warehouse)
 
     def test_active(self):
         self.w.activate()
@@ -54,7 +54,7 @@ class WarehouseTest(unittest.TestCase):
 
 class TableTest(unittest.TestCase):
     def setUp(self):
-        self.t = Table(Workspace().client)
+        self.t = Table(w.client)
 
     def test_table_get(self):
         r = self.t.get("azure-open-datasets.nyctlc.yellow")
@@ -63,10 +63,21 @@ class TableTest(unittest.TestCase):
 
 class CatalogTest(unittest.TestCase):
     def setUp(self):
-        self.c = Catalog(Workspace())
+        self.c = Catalog(w)
+        self.s = Schema(w)
+
+    def test_get(self):
+        _ = self.c.get('not_exists')
+        print(_)
 
     def test_create(self):
         self.c.create('test')
 
     def test_delete(self):
         self.c.delete('test')
+
+    def test_schema_create(self):
+        self.s.create('test')
+
+    def test_schema_delete(self):
+        self.s.delete('test')

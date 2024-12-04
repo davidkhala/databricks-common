@@ -9,7 +9,7 @@ from workspace.path import SDK as PATHSDK, NotebookIndex
 from workspace.table import Table
 from workspace.warehouse import Warehouse
 
-w = Workspace()
+w = Workspace.from_local()
 
 
 class TestRest(unittest.TestCase):
