@@ -18,5 +18,3 @@ It is not recommended
 pip install databricks-connect --break-system-packages
 databricks-connect test
 ```
-
-
