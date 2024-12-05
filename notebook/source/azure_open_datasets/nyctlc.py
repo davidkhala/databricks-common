@@ -1,20 +1,26 @@
+import pathlib
 import urllib
 
 from databricks.sdk.runtime import spark, display
 
+from workspace import Workspace
+from workspace.catalog import Catalog, Schema
+
 schema = 'nyctlc'
 
 
-def load_http(year='2024', month='09', catalog: str = None, volume: str = None):
+def prepare(catalog):
+    if catalog:
+        Catalog(Workspace()).create(catalog)
+    spark.sql(f"CREATE SCHEMA IF NOT EXISTS {schema}")
+
+
+def load_raw(year='2024', month='09', catalog: str = None, volume: str = None):
     tables = ['yellow', 'green', 'fhv', 'fhvhv']
     _dir = "/tmp"
 
-    if catalog:
-        from workspace import Workspace
-        from workspace.catalog import Catalog
-        Catalog(Workspace()).create(catalog)
+    prepare(catalog)
 
-    spark.sql(f"CREATE SCHEMA IF NOT EXISTS {schema}")
     if volume and catalog:
         _dir = f"/Volumes/{catalog}/{schema}/{volume}"
         spark.sql(f"CREATE VOLUME IF NOT EXISTS {catalog}.{schema}.{volume}")
@@ -22,7 +28,8 @@ def load_http(year='2024', month='09', catalog: str = None, volume: str = None):
     for table in tables:
         parquet_file_url = f"https://d37ci6vzurychx.cloudfront.net/trip-data/{table}_tripdata_{year}-{month}.parquet"
         parquet_file_path = f"{_dir}/{table}_tripdata_{year}-{month}.parquet"
-        urllib.request.urlretrieve(parquet_file_url, parquet_file_path)
+        if not pathlib.Path(parquet_file_path).exists():
+            urllib.request.urlretrieve(parquet_file_url, parquet_file_path)
         df = spark.read.parquet(parquet_file_path)
 
         full_name = f"{schema}.{table}"
@@ -30,20 +37,28 @@ def load_http(year='2024', month='09', catalog: str = None, volume: str = None):
             full_name = f"{catalog}.{full_name}"
         df.write.saveAsTable(full_name)
 
-def load():
+        if _dir == "/tmp":
+            pathlib.Path(parquet_file_path).unlink(True)
 
-    # Azure Blob Storage access info
+
+def clear(catalog: str = None):
+    Schema(Workspace(), catalog).delete(schema)
+
+
+def load(catalog: str = None):
     blob_account_name = "azureopendatastorage"
     blob_container_name = "nyctlc"
-    blob_relative_paths = ["yellow"]
+    blob_relative_paths = ["yellow", "green", "fhv"]
 
+    prepare(catalog)
     for blob_relative_path in blob_relative_paths:
-
         # abfss cannot work due to missing required config
         # https cannot work
         wasbs_path = f'wasbs://{blob_container_name}@{blob_account_name}.blob.core.windows.net/{blob_relative_path}'
 
-        # Read parquet data from Azure Blob Storage path
         blob_df = spark.read.parquet(wasbs_path)
-        display(blob_df)
 
+        full_name = f"{schema}.{blob_relative_path}"
+        if catalog:
+            full_name = f"{catalog}.{full_name}"
+        blob_df.write.saveAsTable(full_name)

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "davidkhala.databricks"
-version = "0.0.1"
+version = "0.0.2"
 description = ""
 authors = ["David Liu <david-khala@hotmail.com>"]
 license = "MIT"
@@ -9,7 +9,7 @@ packages = [{ include = "workspace" }, { include = "lineage" }, { include = "com
 
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.10"
 databricks-sdk = "*"
 databricks-connect = "^15"
 davidkhala-utils = "*"
