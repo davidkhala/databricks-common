@@ -4,7 +4,7 @@ from databricks.sdk import WorkspaceExt
 from databricks.sdk.service.workspace import ObjectInfo, ObjectType
 from pyspark.sql.connect.session import SparkSession
 
-from common import DatabricksConnect
+from common import SparkDecorator
 from workspace import APIClient, Workspace
 
 
@@ -64,7 +64,7 @@ class NotebookIndex:
 
     def __init__(self, spark: SparkSession):
         self.spark = spark
-        _d = DatabricksConnect(spark)
+        _d = SparkDecorator(spark)
         self.serverless = _d.serverless
         if self.serverless:
             self.schema = _d.schema

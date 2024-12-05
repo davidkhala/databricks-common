@@ -1,7 +1,7 @@
 # Serverless compute
 runtime
 - Python 3.10.12
-
+- databricks-connect 14.3.4
 
 ## Serverless client images
 - A version grouping to wrap compatible python dependencies used for notebook and job

@@ -10,9 +10,11 @@ schema = 'nyctlc'
 
 
 def prepare(catalog):
+    _schema = schema
     if catalog:
         Catalog(Workspace()).create(catalog)
-    spark.sql(f"CREATE SCHEMA IF NOT EXISTS {schema}")
+        _schema = f"{catalog}.{schema}"
+    spark.sql(f"CREATE SCHEMA IF NOT EXISTS {_schema}")
 
 
 def load_raw(year='2024', month='09', catalog: str = None, volume: str = None):
@@ -43,6 +45,8 @@ def load_raw(year='2024', month='09', catalog: str = None, volume: str = None):
 
 def clear(catalog: str = None):
     Schema(Workspace(), catalog).delete(schema)
+    if catalog:
+        Catalog(Workspace()).delete(catalog)
 
 
 def load(catalog: str = None):

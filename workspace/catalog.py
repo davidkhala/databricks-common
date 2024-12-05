@@ -1,4 +1,3 @@
-from databricks.sdk import WorkspaceClient
 from databricks.sdk.errors import platform
 
 from workspace import Workspace
