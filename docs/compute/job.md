@@ -1,2 +1,2 @@
 # Job Compute
-- for running DLT, jobs
+- for running workflows (DLT or jobs) in servermore fashion
