@@ -14,5 +14,5 @@ jobs:
       - name: Install dependencies
         run: poetry install
         working-directory: py/test/self
-      - run: poetry run pytest
+      - run: python test.py
         working-directory: py/test/self

@@ -5,12 +5,6 @@ package-mode = false
 python = "^3.10"
 davidkhala-databricks = {version="*", extras=["connect"]}
 
-[tool.poetry.group.dev.dependencies]
-pytest = "*"
-
-[tool.poetry.scripts]
-test = "pytest:main"
-
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
