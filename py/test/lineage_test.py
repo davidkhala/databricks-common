@@ -1,13 +1,12 @@
 import unittest
 
-from syntax.fs import write_json
+from davidkhala.syntax.fs import write_json
 
-from py.lineage import Table as TableLineage, Column as ColumnLineage
-from py.lineage.rest import API as RESTAPI
-from py.workspace import Workspace
-from py.workspace.path import SDK as PATHSDK, NotebookIndex
-from py.workspace.table import Table
-from py.workspace.warehouse import Warehouse
+from davidkhala.databricks.lineage.rest import API as RESTAPI
+from davidkhala.databricks.workspace import Workspace
+from davidkhala.databricks.workspace.path import SDK as PATHSDK
+from davidkhala.databricks.workspace.table import Table
+from davidkhala.databricks.connect.notebook import Index as NotebookIndex
 
 w = Workspace.from_local()
 
@@ -29,20 +28,6 @@ class TestRest(unittest.TestCase):
             print(c_l)
 
 
-class TestLineage(unittest.TestCase):
-    def setUp(self):
-        http_path = '/sql/1.0/warehouses/f74f8ec14f4e81fa'
-        warehouse = Warehouse(w.client, http_path)
-        self.t = TableLineage(w.client)
-        self.c = ColumnLineage(w.client, warehouse)
-
-    def test_table_lineage(self):
-        l = self.t.run()
-        write_json(l, "all-table-lineage")
-
-    def test_column_lineage(self):
-        c = self.c.run()
-        write_json(c, "all-column-lineage")
 
 
 class TestE2E(unittest.TestCase):

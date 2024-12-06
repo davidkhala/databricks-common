@@ -3,6 +3,7 @@ import os
 from databricks.connect import DatabricksSession, cli
 from databricks.sdk.config import Config
 from pyspark.sql import SparkSession
+from davidkhala.spark import SessionDecorator as SparkDecorator
 
 
 class DatabricksConnect:
@@ -43,4 +44,17 @@ class DatabricksConnect:
         return _builder.getOrCreate()
 
 
+class SessionDecorator(SparkDecorator):
+    @property
+    def serverless(self) -> bool:
+        # assert on serverless config
+        return (
+                self.conf.get("spark.databricks.clusterUsageTags.clusterId") is None
+                and self.conf.get('spark.sql.ansi.enabled') == 'true'
+                and self.conf.get('spark.sql.shuffle.partitions', ) == 'auto'
+                and self.conf.__len__() == 2
+        )
 
+    @property
+    def conf(self) -> dict:
+        return self.spark.conf.getAll

@@ -1,11 +1,11 @@
 import unittest
 
-from syntax.fs import write_json
+from davidkhala.syntax.fs import write_json
 
-from py.workspace import Workspace, path
-from py.workspace.catalog import Catalog, Schema
-from py.workspace.warehouse import Warehouse
-from py.workspace.table import Table
+from davidkhala.databricks.workspace import Workspace, path
+from davidkhala.databricks.workspace.catalog import Catalog, Schema
+from davidkhala.databricks.workspace.table import Table
+from davidkhala.databricks.workspace.warehouse import Warehouse
 
 w = Workspace.from_local()
 

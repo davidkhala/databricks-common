@@ -1,6 +1,6 @@
 from databricks.sdk.errors import platform
 
-from py.workspace import Workspace
+from davidkhala.databricks.workspace import Workspace
 
 
 class Catalog:

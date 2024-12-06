@@ -1,10 +1,9 @@
 import unittest
 
-from syntax.fs import write_json
+from davidkhala.syntax.fs import write_json
 
-from py.common import SparkDecorator
-from py.connect import DatabricksConnect
-from py.workspace import Workspace
+from davidkhala.databricks.connect import SessionDecorator, DatabricksConnect
+from davidkhala.databricks.workspace import Workspace
 
 
 class DatabricksConnectTest(unittest.TestCase):
@@ -29,8 +28,10 @@ class DatabricksConnectTest(unittest.TestCase):
         spark.sql('select 1')
         spark.createDataFrame(self.data, self.columns)
         #
-        d = SparkDecorator(spark)
+        d = SessionDecorator(spark)
         self.assertTrue(d.serverless)
+        #
+        print(d.conf)
         spark.stop()
 
     def test_servermore(self):
@@ -40,7 +41,7 @@ class DatabricksConnectTest(unittest.TestCase):
         spark.createDataFrame(self.data, self.columns)
         write_json(spark.conf.getAll, self.config.cluster_id)
         #
-        d = SparkDecorator(spark)
+        d = SessionDecorator(spark)
         self.assertFalse(d.serverless)
         spark.stop()
         self.config.cluster_id = None

@@ -1,4 +1,4 @@
-from py.workspace import APIClient
+from davidkhala.databricks.workspace import APIClient
 
 
 class API:

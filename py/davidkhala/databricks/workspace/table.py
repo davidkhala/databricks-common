@@ -2,7 +2,7 @@ import json
 
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.catalog import TableInfo
-from syntax.js import Array
+from davidkhala.syntax.js import Array
 
 
 class Table:

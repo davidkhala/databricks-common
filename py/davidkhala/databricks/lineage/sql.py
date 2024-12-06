@@ -1,8 +1,8 @@
 import os
 
-from syntax.fs import read
+from davidkhala.syntax.fs import read
 
-from py.workspace.warehouse import Warehouse
+from davidkhala.databricks.workspace.warehouse import Warehouse
 
 
 class Query:

@@ -13,7 +13,7 @@ class Workspace:
 
     @staticmethod
     def from_local():
-        from py.common.local import CONFIG_PATH
+        from davidkhala.databricks.local import CONFIG_PATH
         if not pathlib.Path(CONFIG_PATH).exists():
             raise FileNotFoundError(CONFIG_PATH + " does not exist")
         return Workspace()

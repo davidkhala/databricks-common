@@ -1,6 +1,6 @@
 name: libraries
 
-on: workflow_dispatch
+on: push
 
 jobs:
   install-published:
@@ -9,9 +9,10 @@ jobs:
       - uses: actions/checkout@main
       - name: Install Poetry
         uses: snok/install-poetry@main
+      - run: ./cli/setup.sh install
+      - run: ./cli/setup.sh login-serverless adb-2367537008441771.11.azuredatabricks.net ${{secrets.PAT}}
       - name: Install dependencies
         run: poetry install
         working-directory: py/test/self
-      - run: ./cli/setup.sh login-serverless adb-2367537008441771.11.azuredatabricks.net ${{secrets.PAT}}
       - run: poetry run pytest
         working-directory: py/test/self

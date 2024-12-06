@@ -1,7 +1,7 @@
 import unittest
 
-from py.common.local import CONFIG_PATH
-from py.workspace import Workspace
+from davidkhala.databricks.local import CONFIG_PATH
+from davidkhala.databricks.workspace import Workspace
 
 
 class CommonTest(unittest.TestCase):
