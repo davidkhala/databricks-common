@@ -1,4 +1,4 @@
-from workspace import APIClient
+from py.workspace import APIClient
 
 
 class API:

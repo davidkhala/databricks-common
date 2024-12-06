@@ -1,7 +1,7 @@
 import unittest
 
-from common.local import CONFIG_PATH
-from workspace import Workspace
+from py.common.local import CONFIG_PATH
+from py.workspace import Workspace
 
 
 class CommonTest(unittest.TestCase):

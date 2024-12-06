@@ -4,8 +4,8 @@ from databricks.sdk import WorkspaceExt
 from databricks.sdk.service.workspace import ObjectInfo, ObjectType
 from pyspark.sql.connect.session import SparkSession
 
-from common import SparkDecorator
-from workspace import APIClient, Workspace
+from py.common import SparkDecorator
+from py.workspace import APIClient, Workspace
 
 
 class API:

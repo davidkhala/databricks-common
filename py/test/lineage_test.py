@@ -2,12 +2,12 @@ import unittest
 
 from syntax.fs import write_json
 
-from lineage import Table as TableLineage, Column as ColumnLineage
-from lineage.rest import API as RESTAPI
-from workspace import Workspace
-from workspace.path import SDK as PATHSDK, NotebookIndex
-from workspace.table import Table
-from workspace.warehouse import Warehouse
+from py.lineage import Table as TableLineage, Column as ColumnLineage
+from py.lineage.rest import API as RESTAPI
+from py.workspace import Workspace
+from py.workspace.path import SDK as PATHSDK, NotebookIndex
+from py.workspace.table import Table
+from py.workspace.warehouse import Warehouse
 
 w = Workspace.from_local()
 

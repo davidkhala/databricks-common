@@ -1,10 +1,10 @@
 import pathlib
 import urllib
 
-from databricks.sdk.runtime import spark, display
+from databricks.sdk.runtime import spark
 
-from workspace import Workspace
-from workspace.catalog import Catalog, Schema
+from py.workspace import Workspace
+from py.workspace.catalog import Catalog, Schema
 
 schema = 'nyctlc'
 

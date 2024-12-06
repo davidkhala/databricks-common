@@ -2,7 +2,7 @@ import os
 
 from syntax.fs import read
 
-from workspace.warehouse import Warehouse
+from py.workspace.warehouse import Warehouse
 
 
 class Query:

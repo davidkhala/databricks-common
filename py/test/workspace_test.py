@@ -2,10 +2,10 @@ import unittest
 
 from syntax.fs import write_json
 
-from workspace import Workspace, path
-from workspace.catalog import Catalog, Schema
-from workspace.warehouse import Warehouse
-from workspace.table import Table
+from py.workspace import Workspace, path
+from py.workspace.catalog import Catalog, Schema
+from py.workspace.warehouse import Warehouse
+from py.workspace.table import Table
 
 w = Workspace.from_local()
 

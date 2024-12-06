@@ -2,9 +2,9 @@ import unittest
 
 from syntax.fs import write_json
 
-from common import SparkDecorator
-from connect import DatabricksConnect
-from workspace import Workspace
+from py.common import SparkDecorator
+from py.connect import DatabricksConnect
+from py.workspace import Workspace
 
 
 class DatabricksConnectTest(unittest.TestCase):
