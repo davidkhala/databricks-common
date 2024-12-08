@@ -29,6 +29,7 @@ display({
 
 # COMMAND ----------
 from pyspark.sql import SparkSession
-inline_spark=SparkSession.builder.getOrCreate()
+
+inline_spark = SparkSession.builder.getOrCreate()
 print(inline_spark.catalog.currentCatalog() + '.' + inline_spark.catalog.currentDatabase())
 inline_spark.conf.get("spark.databricks.clusterUsageTags.clusterId")
