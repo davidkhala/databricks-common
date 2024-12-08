@@ -1,4 +1,4 @@
 dist
 .idea
 __pycache__
-py/poetry.lock
+poetry.lock
