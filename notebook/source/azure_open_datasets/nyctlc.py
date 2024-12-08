@@ -3,8 +3,8 @@ import urllib
 
 from databricks.sdk.runtime import spark
 
-from py.workspace import Workspace
-from py.workspace.catalog import Catalog, Schema
+from davidkhala.databricks.workspace import Workspace
+from davidkhala.databricks.workspace.catalog import Catalog, Schema
 
 schema = 'nyctlc'
 
@@ -37,7 +37,7 @@ def load_raw(year='2024', month='09', catalog: str = None, volume: str = None):
         full_name = f"{schema}.{table}"
         if catalog:
             full_name = f"{catalog}.{full_name}"
-        df.write.saveAsTable(full_name)
+        df.write.mode("overwrite").saveAsTable(full_name)
 
         if _dir == "/tmp":
             pathlib.Path(parquet_file_path).unlink(True)
@@ -50,6 +50,11 @@ def clear(catalog: str = None):
 
 
 def load(catalog: str = None):
+    """
+    Directly from external endpoint. Not lineage will be introduced
+    :param catalog:
+    :return:
+    """
     blob_account_name = "azureopendatastorage"
     blob_container_name = "nyctlc"
     blob_relative_paths = ["yellow", "green", "fhv"]
@@ -65,4 +70,4 @@ def load(catalog: str = None):
         full_name = f"{schema}.{blob_relative_path}"
         if catalog:
             full_name = f"{catalog}.{full_name}"
-        blob_df.write.saveAsTable(full_name)
+        blob_df.write.mode("overwrite").saveAsTable(full_name)

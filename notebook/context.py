@@ -10,6 +10,8 @@
 # MAGIC %sh python --version
 
 # COMMAND ----------
+# MAGIC %sh cat ~/.databrickscfg # No such file or directory
+# COMMAND ----------
 from databricks.sdk.runtime import dbutils, display, spark
 
 Context = dbutils.notebook.entry_point.getDbutils().notebook().getContext()
@@ -24,3 +26,9 @@ display({
     'workspaceId': workspaceId,
     'dbr_version': dbr_version,
 })
+
+# COMMAND ----------
+from pyspark.sql import SparkSession
+inline_spark=SparkSession.builder.getOrCreate()
+print(inline_spark.catalog.currentCatalog() + '.' + inline_spark.catalog.currentDatabase())
+inline_spark.conf.get("spark.databricks.clusterUsageTags.clusterId")
