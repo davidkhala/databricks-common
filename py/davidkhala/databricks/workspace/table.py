@@ -9,6 +9,7 @@ class Table:
     """
     NOTE: table create is not supported by SDK. Use dataframe instead.
     """
+
     def __init__(self, client: WorkspaceClient):
         self.client = client
 
@@ -20,6 +21,10 @@ class Table:
 
     def _get(self, full_name: str) -> TableInfo:
         return self.client.tables.get(full_name)
+
+    def exists(self, full_name: str) -> bool:
+        r = self.client.tables.exists(full_name)
+        return r.table_exists
 
     def list(self, catalog_name: str, schema_name: str):
         return self.client.tables.list(catalog_name, schema_name)

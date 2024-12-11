@@ -2,8 +2,8 @@ import os
 
 from databricks.connect import DatabricksSession, cli
 from databricks.sdk.config import Config
-from pyspark.sql import SparkSession
 from davidkhala.spark import SessionDecorator as SparkDecorator
+from pyspark.sql import SparkSession
 
 
 class DatabricksConnect:
