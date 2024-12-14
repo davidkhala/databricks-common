@@ -3,16 +3,16 @@ name: libraries
 on: push
 
 jobs:
-  install-published:
+  self-reference:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@main
       - name: Install Poetry
         uses: snok/install-poetry@main
       - run: ./cli/setup.sh install
-      - run: ./cli/setup.sh login-serverless adb-2367537008441771.11.azuredatabricks.net ${{secrets.PAT}}
+      - run: ./cli/setup.sh login-serverless ${{ vars.WORKSPACE }} ${{secrets.PAT}}
       - name: Install dependencies
-        run: poetry install
+        run: poetry install --all-extras
         working-directory: py/test/self
-      - run: python test.py
+      - run: poetry run python test.py
         working-directory: py/test/self
