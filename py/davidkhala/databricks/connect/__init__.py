@@ -49,17 +49,20 @@ class SessionDecorator(SparkDecorator):
     def serverless(self) -> bool:
         # assert on serverless config
         return (
-                self.conf.get("spark.databricks.clusterUsageTags.clusterId") is None
+                self.cluster_id is None
                 and self.conf.get('spark.sql.ansi.enabled') == 'true'
                 and self.conf.get('spark.sql.shuffle.partitions', ) == 'auto'
                 and self.conf.__len__() == 2
         )
 
+    @property
+    def cluster_id(self) -> str | None:
+        return self.conf.get("spark.databricks.clusterUsageTags.clusterId")
+
     def is_servermore(self, cluster_id) -> bool:
-        self.cluster_id = cluster_id
         return (
                 self.serverless is False
-                and self.conf.get('spark.databricks.clusterUsageTags.clusterId') == cluster_id
+                and self.cluster_id == cluster_id
                 and self.conf.__len__() == 437
         )
 
