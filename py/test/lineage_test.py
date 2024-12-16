@@ -28,16 +28,5 @@ class TestRest(unittest.TestCase):
             print(c_l)
 
 
-
-
-class TestE2E(unittest.TestCase):
-    s = PATHSDK.from_workspace(w)
-    def setUp(self):
-        i = NotebookIndex(w)
-    def test_start(self):
-        r = self.s.get_by(notebook_id=918032188629039)
-        print(r)
-
-
 if __name__ == '__main__':
     unittest.main()

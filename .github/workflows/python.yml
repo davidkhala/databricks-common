@@ -1,4 +1,4 @@
-name: libraries
+name: Python on push
 
 on: push
 

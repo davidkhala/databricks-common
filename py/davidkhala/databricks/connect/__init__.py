@@ -55,6 +55,14 @@ class SessionDecorator(SparkDecorator):
                 and self.conf.__len__() == 2
         )
 
+    def is_servermore(self, cluster_id) -> bool:
+        self.cluster_id = cluster_id
+        return (
+                self.serverless is False
+                and self.conf.get('spark.databricks.clusterUsageTags.clusterId') == cluster_id
+                and self.conf.__len__() == 437
+        )
+
     @property
     def conf(self) -> dict:
         return self.spark.conf.getAll

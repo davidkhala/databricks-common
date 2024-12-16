@@ -12,7 +12,7 @@ w = Workspace.from_local()
 
 class WorkspaceTest(unittest.TestCase):
 
-    def test_client(self):
+    def setUp(self):
         print(w.config_token)
 
     def test_SDK(self):

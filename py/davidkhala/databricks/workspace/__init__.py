@@ -2,6 +2,7 @@ import pathlib
 
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.config import Config
+from databricks.sdk.service.compute import ClusterDetails
 
 
 class Workspace:
@@ -18,8 +19,14 @@ class Workspace:
             raise FileNotFoundError(CONFIG_PATH + " does not exist")
         return Workspace()
 
-    def clusters(self):
+    def clusters(self) -> list[ClusterDetails]:
         return list(self.client.clusters.list())
+
+    def cluster_id_list(self) -> list[str]:
+        r = []
+        for cluster in self.client.clusters.list():
+            r.append(cluster.cluster_id)
+        return r
 
     @property
     def config(self) -> Config:
