@@ -16,7 +16,7 @@ class Table:
     def get(self, full_name: str):
         return Table.pretty(self._get(full_name))
 
-    def columns(self, full_name: str) -> list[str]:
+    def column_names(self, full_name: str) -> list[str]:
         return list(map(lambda column: column.name, self._get(full_name).columns))
 
     def _get(self, full_name: str) -> TableInfo:

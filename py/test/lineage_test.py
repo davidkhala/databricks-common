@@ -20,7 +20,7 @@ class TestRest(unittest.TestCase):
 
         write_json(table_lineage, table_name + '.lineage')
         # column lineage
-        columns = self.t.columns(table_name)
+        columns = self.t.column_names(table_name)
         for column in columns:
             c_l = self.api.get_column(table_name, column)
             print(c_l)
