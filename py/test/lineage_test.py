@@ -4,9 +4,7 @@ from davidkhala.syntax.fs import write_json
 
 from davidkhala.databricks.lineage.rest import API as RESTAPI
 from davidkhala.databricks.workspace import Workspace
-from davidkhala.databricks.workspace.path import SDK as PATHSDK
 from davidkhala.databricks.workspace.table import Table
-from davidkhala.databricks.connect.notebook import Index as NotebookIndex
 
 w = Workspace.from_local()
 
