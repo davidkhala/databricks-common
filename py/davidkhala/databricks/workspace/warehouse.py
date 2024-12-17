@@ -3,13 +3,29 @@ from databricks.sdk.service.sql import StatementState, StatementResponse
 
 
 class Warehouse:
-    def __init__(self, client: WorkspaceClient, http_path: str):
+    def __init__(self, client: WorkspaceClient, warehouse_id: str = None):
+        """
+        :param client:
+        :param warehouse_id: e.g. '7969d92540da7f02'
+        """
+        self.client, self.warehouse_id = [client, warehouse_id]
+
+    def get_one(self):
+        for warehouse in self.ls():
+            self.warehouse_id = warehouse.id
+            return self
+
+    @staticmethod
+    def from_http_path(client: WorkspaceClient, http_path: str):
         """
         :param client:
         :param http_path: e.g. '/sql/1.0/warehouses/7969d92540da7f02'
+        :return:
         """
-        self.client = client
-        self.warehouse_id = http_path.split('/')[-1]
+        return Warehouse(client, http_path.split('/')[-1])
+
+    def ls(self):
+        return self.client.warehouses.list()
 
     def run_async(self, query: str):
         return self.client.statement_execution.execute_statement(query, self.warehouse_id)

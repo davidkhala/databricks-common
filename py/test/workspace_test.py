@@ -27,9 +27,11 @@ class WorkspaceTest(unittest.TestCase):
 
 class WarehouseTest(unittest.TestCase):
     def setUp(self):
-        warehouse = '/sql/1.0/warehouses/f74f8ec14f4e81fa'
-        self.w = Warehouse(w.client, warehouse)
-
+        self.w = Warehouse(w.client)
+        self.w.get_one()
+    def test_list(self):
+        for warehouse in self.w.ls():
+            print(warehouse.id)
     def test_active(self):
         self.w.activate()
 
@@ -57,8 +59,9 @@ class TableTest(unittest.TestCase):
         self.t = Table(w.client)
 
     def test_table_get(self):
-        r = self.t.get("azure-open-datasets.nyctlc.yellow")
-        write_json(r, "azure-open-datasets.nyctlc.yellow")
+        table_name = 'azureopendatastorage.nyctlc.yellow'
+        r = self.t.get(table_name)
+        write_json(r, table_name)
 
 
 class CatalogTest(unittest.TestCase):

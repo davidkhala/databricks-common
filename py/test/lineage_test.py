@@ -15,10 +15,10 @@ class TestRest(unittest.TestCase):
         self.t = Table(w.client)
 
     def test_API_lineage(self):
-        table_name = 'azure-open-datasets.nyctlc.yellow'
+        table_name = 'azureopendatastorage.nyctlc.yellow'
         table_lineage = self.api.get_table(table_name)
 
-        write_json(table_lineage, table_name + '.table')
+        write_json(table_lineage, table_name + '.lineage')
         # column lineage
         columns = self.t.columns(table_name)
         for column in columns:

@@ -16,8 +16,8 @@ class Table:
     def get(self, full_name: str):
         return Table.pretty(self._get(full_name))
 
-    def columns(self, full_name: str):
-        return Array(self._get(full_name).columns).map(lambda column: column.name)
+    def columns(self, full_name: str) -> list[str]:
+        return list(map(lambda column: column.name, self._get(full_name).columns))
 
     def _get(self, full_name: str) -> TableInfo:
         return self.client.tables.get(full_name)
@@ -30,22 +30,16 @@ class Table:
         return self.client.tables.list(catalog_name, schema_name)
 
     @staticmethod
-    def columns_of(table: TableInfo):
-        return Array(table.columns).map(lambda column: {
-            'name': column.name,
-            'nullable': column.nullable,
-            'type': json.loads(column.type_json)['type']
-        })
-
-    @staticmethod
     def pretty(table: TableInfo):
-        d = table.as_dict()
         return {
-            'catalog_name': d['catalog_name'],
-            'columns': Table.columns_of(table),
-            'comment': d['comment'],
-            "data_source_format": d['data_source_format'],
-            'name': d['name'],
-            'schema_name': d['schema_name'],
-            'id': d['table_id'],
+            'catalog_name': table.catalog_name,
+            'columns': Array(table.columns).map(lambda column: {
+                'name': column.name,
+                'nullable': column.nullable,
+                'type': json.loads(column.type_json)['type']
+            }),
+            "data_source_format": table.data_source_format.name,
+            'name': table.name,
+            'schema_name': table.schema_name,
+            'id': table.table_id,
         }
