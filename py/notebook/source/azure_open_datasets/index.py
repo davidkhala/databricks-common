@@ -1,6 +1,7 @@
-import nyctlc
+from nyctlc import NycTLC
 
-nyctlc.load()
+instance = NycTLC()
+instance.load()
 
 # COMMAND ----------
-nyctlc.copy_to_current()
+instance.copy_to_current()

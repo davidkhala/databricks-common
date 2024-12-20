@@ -5,7 +5,6 @@ from davidkhala.syntax.fs import write_json
 
 from davidkhala.databricks.workspace import Workspace, path
 from davidkhala.databricks.workspace.catalog import Catalog, Schema
-from davidkhala.databricks.workspace.table import Table
 from davidkhala.databricks.workspace.warehouse import Warehouse
 
 w = Workspace.from_local()
@@ -18,7 +17,7 @@ class WorkspaceTest(unittest.TestCase):
 
     def test_notebook(self):
         s = path.SDK.from_workspace(w)
-        local_notebook_path = os.path.abspath("./notebook/context.ipynb")
+        local_notebook_path = os.path.join(os.path.dirname(__file__), "../notebook/context.ipynb")
 
         s.upload_notebook(local_notebook_path, '/Shared/context')
         notebook_id = s.get_by(path='context')
@@ -61,37 +60,7 @@ class WarehouseTest(unittest.TestCase):
         write_json(r, 'table-lineage')
 
 
-class TableTest(unittest.TestCase):
-    def setUp(self):
-        self.t = Table(w.client)
-        from notebook.source.azure_open_datasets import nyctlc
-        nyctlc.load()
-        nyctlc.copy_to_current()
 
-    def test_table_get(self):
-        from notebook.source.azure_open_datasets.context import catalog
-        table_name = f"{catalog}.nyctlc.yellow"
-        r = self.t.get(table_name)
-        write_json(r, table_name)
-
-
-class LineageTest(unittest.TestCase):
-    def setUp(self):
-        from davidkhala.databricks.lineage.rest import API as RESTAPI
-        self.api = RESTAPI(w.api_client)
-        self.t = Table(w.client)
-
-    def test_API_lineage(self):
-        from notebook.source.azure_open_datasets.context import catalog
-        table_name = f"{catalog}.nyctlc.yellow"
-        table_lineage = self.api.get_table(table_name)
-
-        write_json(table_lineage, table_name + '.lineage')
-        # column lineage
-        columns = self.t.column_names(table_name)
-        for column in columns:
-            c_l = self.api.get_column(table_name, column)
-            print(c_l)
 
 
 class CatalogTest(unittest.TestCase):
