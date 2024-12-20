@@ -11,9 +11,9 @@ class Catalog:
     def catalogs(self):
         return self.w.client.catalogs
 
-    def create(self, name, *, withMetastoreLevelStorage=False, storage_root=None, if_not_exists=True):
+    def create(self, name, *, withMetastoreLevelStorage=False, storage_root=None):
 
-        if if_not_exists and self.get(name) is not None:
+        if self.get(name):
             return
 
         if withMetastoreLevelStorage:
@@ -24,7 +24,7 @@ class Catalog:
             return self.catalogs.create(name, storage_root=storage_root)
 
     def get(self, name=None):
-        if name is None:
+        if not name:
             name = self.w.catalog
         try:
             return self.catalogs.get(name)
@@ -56,10 +56,18 @@ class Schema:
             if str(e) == f"Schema '{self.catalog}.{name}' does not exist.":
                 return None
 
-    def create(self, name, if_not_exists=True):
-        if if_not_exists and self.get(name):
-            return
-        return self.schemas.create(name, self.catalog)
+    def create(self, name):
+        try:
+            return self.schemas.create(name, self.catalog)
+        except platform.BadRequest as e:
+            if str(e) == f"Schema '{name}' already exists":
+                return
+            raise e
 
     def delete(self, name):
-        return self.schemas.delete(f"{self.catalog}.{name}", force=True)
+        try:
+            return self.schemas.delete(f"{self.catalog}.{name}", force=True)
+        except platform.NotFound as e:
+            if str(e) == f"Schema '{self.catalog}.{name}' does not exist.":
+                return None
+            raise e
