@@ -20,6 +20,11 @@ davidkhala-spark = { version = "*", optional = true }
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
 
+
+[tool.pytest.ini_options]
+addopts = [
+    "--ignore=test/self",
+]
 [tool.poetry.scripts]
 test = "pytest:main"
 

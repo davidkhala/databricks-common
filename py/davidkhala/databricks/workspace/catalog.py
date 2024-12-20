@@ -50,10 +50,14 @@ class Schema:
         return self.w.client.schemas
 
     def get(self, name='default'):
-        return self.schemas.get(f"{self.catalog}.{name}")
+        try:
+            return self.schemas.get(f"{self.catalog}.{name}")
+        except platform.NotFound as e:
+            if str(e) == f"Schema '{self.catalog}.{name}' does not exist.":
+                return None
 
     def create(self, name, if_not_exists=True):
-        if if_not_exists and self.get(name) is not None:
+        if if_not_exists and self.get(name):
             return
         return self.schemas.create(name, self.catalog)
 

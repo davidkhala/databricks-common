@@ -1,6 +1,6 @@
 import pathlib
 import urllib
-
+import context
 from databricks.sdk.runtime import spark
 
 from davidkhala.databricks.workspace import Workspace
@@ -17,7 +17,7 @@ def prepare(catalog):
     spark.sql(f"CREATE SCHEMA IF NOT EXISTS {_schema}")
 
 
-def load_raw(year='2024', month='09', catalog: str = None, volume: str = None):
+def load_raw(year='2024', month='09', catalog: str = context.catalog, volume: str = context.default_volume):
     tables = ['yellow', 'green', 'fhv', 'fhvhv']
     _dir = "/tmp"
 
@@ -43,13 +43,13 @@ def load_raw(year='2024', month='09', catalog: str = None, volume: str = None):
             pathlib.Path(parquet_file_path).unlink(True)
 
 
-def clear(catalog: str = None):
+def clear(catalog: str = context.catalog):
     Schema(Workspace(), catalog).delete(schema)
     if catalog:
         Catalog(Workspace()).delete(catalog)
 
 
-def load(catalog: str = None):
+def load(catalog: str = context.catalog):
     """
     Directly from external endpoint. Not lineage will be introduced
     :param catalog:
@@ -71,3 +71,10 @@ def load(catalog: str = None):
         if catalog:
             full_name = f"{catalog}.{full_name}"
         blob_df.write.mode("overwrite").saveAsTable(full_name)
+
+def copy_to_current(from_catalog: str = context.catalog):
+    spark.sql(f"CREATE SCHEMA IF NOT EXISTS {schema}")
+    tables = ["yellow", "green", "fhv"]
+    for table in tables:
+        df = spark.table(f"{from_catalog}.{schema}.{table}")
+        df.write.mode("overwrite").saveAsTable(f"{schema}.{table}")

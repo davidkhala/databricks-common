@@ -1,7 +1,7 @@
 from typing import Iterator
 
 from databricks.sdk import WorkspaceExt
-from databricks.sdk.service.workspace import ObjectInfo, ObjectType
+from databricks.sdk.service.workspace import ObjectInfo, ObjectType, ImportFormat
 
 from davidkhala.databricks.workspace import APIClient, Workspace
 
@@ -42,6 +42,17 @@ class SDK:
     @staticmethod
     def from_workspace(w: Workspace):
         return SDK(w.client.workspace)
+
+    def upload_notebook(self, local_notebook_path: str, target_path, *, overwrite=True):
+        from base64 import b64encode
+
+        with open(local_notebook_path, encoding="utf-8") as file:
+            self.workspace.import_(
+                target_path,
+                content=b64encode(file.read().encode()).decode(),
+                format=ImportFormat.JUPYTER,
+                overwrite=overwrite,
+            )
 
     def ls(self, path="/") -> Iterator[ObjectInfo]:
         return self.workspace.list(path, recursive=True)

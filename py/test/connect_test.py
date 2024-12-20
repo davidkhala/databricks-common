@@ -1,7 +1,5 @@
 import unittest
 
-from davidkhala.syntax.fs import write_json
-
 from davidkhala.databricks.connect import SessionDecorator, DatabricksConnect
 from davidkhala.databricks.workspace import Workspace
 
@@ -42,11 +40,15 @@ class DatabricksConnectTest(unittest.TestCase):
         spark.stop()
 
     def test_servermore(self):
-        clusters = self.w.cluster_id_list()
+        clusters = self.w.cluster_ids()
 
         if len(clusters) > 0:
-            print(clusters[0])
-            self.config.cluster_id = clusters[0]
+            cluster_id = clusters[0]
+            print(cluster_id)
+            self.config.cluster_id = cluster_id
+            from davidkhala.databricks.workspace.server import Cluster
+            Cluster(self.w.client, cluster_id).start()
+
             spark = DatabricksConnect.from_servermore(self.config)
             spark.sql('select 1')
             spark.createDataFrame(self.data, self.columns)
@@ -55,6 +57,7 @@ class DatabricksConnectTest(unittest.TestCase):
             self.assertTrue(d.is_servermore(self.config.cluster_id))
             # cleanup
             spark.stop()
+            Cluster(self.w.client, cluster_id).stop()
             self.config.cluster_id = None
 
 

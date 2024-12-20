@@ -63,7 +63,7 @@ class SessionDecorator(SparkDecorator):
         return (
                 self.serverless is False
                 and self.cluster_id == cluster_id
-                and self.conf.__len__() == 437
+                and self.conf.__len__() > 427
         )
 
     @property

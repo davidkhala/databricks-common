@@ -1,8 +1,6 @@
 import nyctlc
-import context
 
-nyctlc.load_raw(catalog=context.catalog, volume=context.default_volume)
-
+nyctlc.load()
 
 # COMMAND ----------
-context.copy_to_current()
+nyctlc.copy_to_current()

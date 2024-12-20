@@ -22,7 +22,7 @@ class Workspace:
     def clusters(self) -> list[ClusterDetails]:
         return list(self.client.clusters.list())
 
-    def cluster_id_list(self) -> list[str]:
+    def cluster_ids(self) -> list[str]:
         r = []
         for cluster in self.client.clusters.list():
             r.append(cluster.cluster_id)

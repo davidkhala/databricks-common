@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from davidkhala.syntax.fs import write_json
@@ -15,10 +16,14 @@ class WorkspaceTest(unittest.TestCase):
     def setUp(self):
         print(w.config_token)
 
-    def test_SDK(self):
+    def test_notebook(self):
         s = path.SDK.from_workspace(w)
-        self.assertEqual(s.get_by(notebook_id='918032188629039'), '/Shared/context')
-        self.assertEqual(s.get_by(path='context'), '918032188629039')
+        local_notebook_path = os.path.abspath("./notebook/context.ipynb")
+
+        s.upload_notebook(local_notebook_path, '/Shared/context')
+        notebook_id = s.get_by(path='context')
+        print('notebook (context) id', notebook_id)
+        self.assertEqual(s.get_by(notebook_id=notebook_id), '/Shared/context')
 
     def test_clusters(self):
         clusters = w.clusters()
@@ -29,9 +34,11 @@ class WarehouseTest(unittest.TestCase):
     def setUp(self):
         self.w = Warehouse(w.client)
         self.w.get_one()
+
     def test_list(self):
         for warehouse in self.w.ls():
             print(warehouse.id)
+
     def test_active(self):
         self.w.activate()
 
@@ -57,11 +64,34 @@ class WarehouseTest(unittest.TestCase):
 class TableTest(unittest.TestCase):
     def setUp(self):
         self.t = Table(w.client)
+        from notebook.source.azure_open_datasets import nyctlc
+        nyctlc.load()
+        nyctlc.copy_to_current()
 
     def test_table_get(self):
-        table_name = 'azureopendatastorage.nyctlc.yellow'
+        from notebook.source.azure_open_datasets.context import catalog
+        table_name = f"{catalog}.nyctlc.yellow"
         r = self.t.get(table_name)
         write_json(r, table_name)
+
+
+class LineageTest(unittest.TestCase):
+    def setUp(self):
+        from davidkhala.databricks.lineage.rest import API as RESTAPI
+        self.api = RESTAPI(w.api_client)
+        self.t = Table(w.client)
+
+    def test_API_lineage(self):
+        from notebook.source.azure_open_datasets.context import catalog
+        table_name = f"{catalog}.nyctlc.yellow"
+        table_lineage = self.api.get_table(table_name)
+
+        write_json(table_lineage, table_name + '.lineage')
+        # column lineage
+        columns = self.t.column_names(table_name)
+        for column in columns:
+            c_l = self.api.get_column(table_name, column)
+            print(c_l)
 
 
 class CatalogTest(unittest.TestCase):
