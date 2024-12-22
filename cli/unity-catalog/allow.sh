@@ -1,12 +1,4 @@
-# Unity Catalog
-catelogs() {
-    databricks catalogs list --include-browse
-}
-schemas() {
-    local catalog=${1:-$catalog}
-    databricks schemas list $catalog --include-browse
-}
-allowlist() {
+list() {
     # artifact allowlist
     echo ">>> init script"
     databricks artifact-allowlists get INIT_SCRIPT
@@ -17,14 +9,14 @@ allowlist() {
     echo ">>> maven"
     databricks artifact-allowlists get LIBRARY_MAVEN
 }
-allow-script() {
+script() {
     databricks artifact-allowlists update INIT_SCRIPT --json "{\"artifact_matchers\": [{\"artifact\": \"$@\",\"match_type\": \"PREFIX_MATCH\"}]}"
 }
-allow-jar() {
+jar() {
     databricks artifact-allowlists update LIBRARY_JAR --json "{\"artifact_matchers\": [{\"artifact\": \"$@\",\"match_type\": \"PREFIX_MATCH\"}]}"
 }
-allow-maven() {
+maven() {
     databricks artifact-allowlists update LIBRARY_MAVEN --json "{\"artifact_matchers\": [{\"artifact\": \"$@\",\"match_type\": \"PREFIX_MATCH\"}]}"
 }
 
-$@
+"$@"
