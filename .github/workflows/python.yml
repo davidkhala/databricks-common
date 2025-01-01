@@ -13,19 +13,17 @@ jobs:
       - run: ./cli/setup.sh login-serverless ${{ vars.WORKSPACE }} ${{secrets.PAT}}
       - name: Install dependencies
         run: poetry install --all-extras
-        working-directory: py/test/self
+        working-directory: py/tests/self
       - run: poetry run python test.py
-        working-directory: py/test/self
+        working-directory: py/tests/self
   tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@main
-      - name: Install Poetry
-        uses: snok/install-poetry@main
+      - uses: snok/install-poetry@main
       - run: ./cli/setup.sh install
       - run: ./cli/setup.sh login-serverless ${{ vars.WORKSPACE }} ${{secrets.PAT}}
-      - name: Install dependencies
-        run: poetry install --all-extras
+      - run: poetry install --all-extras
         working-directory: py
       - run: poetry run test
         working-directory: py

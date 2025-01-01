@@ -23,7 +23,7 @@ pytest = "*"
 
 [tool.pytest.ini_options]
 addopts = [
-    "--ignore=test/self",
+    "--ignore=tests/self",
 ]
 [tool.poetry.scripts]
 test = "pytest:main"
