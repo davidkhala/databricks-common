@@ -13,22 +13,29 @@ schema = 'nyctlc'
 
 
 class NycTLC(SparkWare):
+
+    w= Workspace()
+    wc = w.client
+    t = Table(wc)
+    overwrite:bool= True
     def __init__(self, spark_instance=None):
         super().__init__(spark_instance)
         self.schema = schema
         self.catalog = context.catalog
 
-        w = Workspace()
-        Catalog(w).create(self.catalog)
-        Schema(w).create(schema)
-        self.wc = w.client
+        Catalog(self.w).create(self.catalog)
+        Schema(self.w).create(schema)
+
 
     def copy_to_current(self):
         self.spark.sql(f"CREATE SCHEMA IF NOT EXISTS {self.schema}")
         tables = ["yellow", "green", "fhv"]
         for table in tables:
             df = self.spark.table(f"{self.catalog}.{schema}.{table}")
-            df.write.mode("overwrite").saveAsTable(f"{schema}.{table}")
+            table_name = f"{schema}.{table}"
+            if self.overwrite:
+                self.spark.sql(f"DROP TABLE IF EXISTS {table_name}")
+            df.write.saveAsTable(table_name)
 
     def load_raw(self, year='2024', month='09', volume: str = context.default_volume):
         """
@@ -54,15 +61,18 @@ class NycTLC(SparkWare):
                 if not pathlib.Path(parquet_file_path).exists():
                     urlretrieve(parquet_file_url, parquet_file_path)
             else:
-                fs = v.fs
-                if not fs.exists(basename):
+                # FIXME: databricks\sdk\retries.py", line 59, in wrapper
+                ## raise TimeoutError(f'Timed out after {timeout}') from last_err
+
+                if not v.fs.exists(basename):
                     urlretrieve(parquet_file_url, basename)
                     v.fs.upload(basename)
 
             df = self.spark.read.parquet(parquet_file_path)
 
             full_name = f"{catalog}.{schema}.{table}"
-            Table(self.wc).delete(full_name)
+            if self.overwrite:
+                self.t.delete(full_name)
             df.write.saveAsTable(full_name)
 
     def load(self):
