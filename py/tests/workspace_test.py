@@ -28,7 +28,17 @@ class WorkspaceTest(unittest.TestCase):
         clusters = w.clusters()
         self.assertGreaterEqual(len(clusters), 0)
 
+class TableTest(unittest.TestCase):
+    def setUp(self):
+        from davidkhala.databricks.workspace.table import Table
+        self.t = Table(w.client)
 
+
+    def test_table_get(self):
+
+        table_name = "samples.nyctaxi.trips"
+        r = self.t.get(table_name)
+        write_json(r, table_name)
 class WarehouseTest(unittest.TestCase):
     def setUp(self):
         self.w = Warehouse(w.client)
