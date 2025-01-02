@@ -17,7 +17,7 @@ class LineageTest(unittest.TestCase):
         from notebook.source.azure_open_datasets.nyctlc import NycTLC
 
         instance = NycTLC(self.spark)
-        instance.load()
+        instance.load_raw()
         instance.copy_to_current()
 
     def test_API_lineage(self):
