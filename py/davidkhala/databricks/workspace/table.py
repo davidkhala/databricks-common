@@ -29,6 +29,8 @@ class Table:
     def list(self, catalog_name: str, schema_name: str):
         return self.client.tables.list(catalog_name, schema_name)
 
+    def delete(self, full_name: str):
+        return self.client.tables.delete(full_name)
     @staticmethod
     def pretty(table: TableInfo):
         return {

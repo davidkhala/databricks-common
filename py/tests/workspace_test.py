@@ -28,17 +28,50 @@ class WorkspaceTest(unittest.TestCase):
         clusters = w.clusters()
         self.assertGreaterEqual(len(clusters), 0)
 
+
 class TableTest(unittest.TestCase):
     def setUp(self):
         from davidkhala.databricks.workspace.table import Table
         self.t = Table(w.client)
 
-
     def test_table_get(self):
-
         table_name = "samples.nyctaxi.trips"
         r = self.t.get(table_name)
         write_json(r, table_name)
+
+
+class VolumeTest(unittest.TestCase):
+    def setUp(self):
+        from davidkhala.databricks.workspace.volume import Volume
+        self.v = Volume(w.client, w.catalog, 'default', 'new')
+        self.fs = self.v.fs
+
+    def test_volume_get(self):
+        print(self.v.get())
+
+    def test_volume_create(self):
+        self.v.create()
+
+    def test_volume_delete(self):
+        self.v.delete()
+
+
+class VolumeFSTest(unittest.TestCase):
+    def setUp(self):
+        from davidkhala.databricks.workspace.volume import Volume
+        self.v = Volume(w.client, w.catalog, 'default', 'volume')
+        self.v.create()
+        self.fs = self.v.fs
+
+    def test_fs_upload(self):
+        self.fs.upload('self/pyproject.toml')
+        print(self.fs.read('pyproject.toml'))
+    def tearDown(self):
+        self.v.delete()
+
+
+
+
 class WarehouseTest(unittest.TestCase):
     def setUp(self):
         self.w = Warehouse(w.client)
@@ -68,9 +101,6 @@ class WarehouseTest(unittest.TestCase):
               and target_table_full_name is not null        
             """)
         write_json(r, 'table-lineage')
-
-
-
 
 
 class CatalogTest(unittest.TestCase):

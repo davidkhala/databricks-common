@@ -1,11 +1,13 @@
 import pathlib
-import urllib
 
+from davidkhala.databricks.workspace.volume import Volume
 from notebook.connect import SparkWare
 from notebook.source.azure_open_datasets import context
 
 from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.catalog import Catalog, Schema
+from davidkhala.databricks.workspace.table import Table
+from notebook.util import is_databricks_notebook
 
 schema = 'nyctlc'
 
@@ -15,9 +17,11 @@ class NycTLC(SparkWare):
         super().__init__(spark_instance)
         self.schema = schema
         self.catalog = context.catalog
-        Catalog(Workspace()).create(self.catalog)
 
-        self.spark.sql(f"CREATE SCHEMA IF NOT EXISTS {self.catalog}.{self.schema}")
+        w = Workspace()
+        Catalog(w).create(self.catalog)
+        Schema(w).create(schema)
+        self.wc = w.client
 
     def copy_to_current(self):
         self.spark.sql(f"CREATE SCHEMA IF NOT EXISTS {self.schema}")
@@ -27,28 +31,39 @@ class NycTLC(SparkWare):
             df.write.mode("overwrite").saveAsTable(f"{schema}.{table}")
 
     def load_raw(self, year='2024', month='09', volume: str = context.default_volume):
+        """
+        :param year:
+        :param month:
+        :param volume:
+        :return:
+        """
         tables = ['yellow', 'green', 'fhv', 'fhvhv']
-        _dir = "/tmp"
 
         catalog = self.catalog
 
-        if volume:
-            _dir = f"/Volumes/{catalog}/{schema}/{volume}"
-            self.spark.sql(f"CREATE VOLUME IF NOT EXISTS {catalog}.{schema}.{volume}")
+        v = Volume(self.wc, catalog, schema, volume)
+        self.spark.sql(f"CREATE VOLUME IF NOT EXISTS {catalog}.{schema}.{volume}")
 
         for table in tables:
-            parquet_file_url = f"https://d37ci6vzurychx.cloudfront.net/trip-data/{table}_tripdata_{year}-{month}.parquet"
-            parquet_file_path = f"{_dir}/{table}_tripdata_{year}-{month}.parquet"
-            if not pathlib.Path(parquet_file_path).exists():
-                urllib.request.urlretrieve(parquet_file_url, parquet_file_path)
+            basename = f"{table}_tripdata_{year}-{month}.parquet"
+            parquet_file_url = f"https://d37ci6vzurychx.cloudfront.net/trip-data/{basename}"
+
+            from urllib.request import urlretrieve
+            parquet_file_path = f"{v.path}/{basename}"
+            if is_databricks_notebook():
+                if not pathlib.Path(parquet_file_path).exists():
+                    urlretrieve(parquet_file_url, parquet_file_path)
+            else:
+                fs = v.fs
+                if not fs.exists(basename):
+                    urlretrieve(parquet_file_url, basename)
+                    v.fs.upload(basename)
+
             df = self.spark.read.parquet(parquet_file_path)
 
             full_name = f"{catalog}.{schema}.{table}"
-
-            df.write.mode("overwrite").saveAsTable(full_name)
-
-            if not volume:
-                pathlib.Path(parquet_file_path).unlink(True)
+            Table(self.wc).delete(full_name)
+            df.write.saveAsTable(full_name)
 
     def load(self):
         """
@@ -67,5 +82,5 @@ class NycTLC(SparkWare):
             blob_df = self.spark.read.parquet(wasbs_path)
 
             full_name = f"{catalog}.{schema}.{blob_relative_path}"
-
-            blob_df.write.mode("overwrite").saveAsTable(full_name)
+            Table(self.wc).delete(full_name)
+            blob_df.write.saveAsTable(full_name)
