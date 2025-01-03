@@ -1,6 +1,9 @@
 name: Python on push
 
-on: push
+on:
+  workflow_dispatch: 
+  schedule:
+  - cron: '0 10 * * 1'  
 
 jobs:
   self-reference:
