@@ -1,14 +1,13 @@
 import pathlib
 import warnings
 
-from davidkhala.databricks.workspace.volume import Volume
-from notebook.connect import SparkWare
-from notebook.source.azure_open_datasets import context
-
+from davidkhala.databricks import is_databricks_notebook
 from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.catalog import Catalog, Schema
 from davidkhala.databricks.workspace.table import Table
-from notebook.util import is_databricks_notebook
+from davidkhala.databricks.workspace.volume import Volume
+from notebook.connect import SparkWare
+from notebook.source.azure_open_datasets import context
 
 schema = 'nyctlc'
 
