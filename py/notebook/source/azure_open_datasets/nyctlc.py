@@ -1,4 +1,5 @@
 import pathlib
+import warnings
 
 from davidkhala.databricks.workspace.volume import Volume
 from notebook.connect import SparkWare
@@ -30,6 +31,10 @@ class NycTLC(SparkWare):
     def copy_to_current(self):
         self.spark.sql(f"CREATE SCHEMA IF NOT EXISTS {self.schema}")
         tables = ["yellow", "green", "fhv"]
+        if not is_databricks_notebook():
+            # TODO what type of lineage record it will have?
+            warnings.warn("copy_to_current() invoked outside notebook cannot be auto-detected by Microsoft Purview", UserWarning)
+
         for table in tables:
             df = self.spark.table(f"{self.catalog}.{schema}.{table}")
             table_name = f"{schema}.{table}"
