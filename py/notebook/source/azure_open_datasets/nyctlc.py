@@ -31,8 +31,7 @@ class NycTLC(SparkWare):
         self.spark.sql(f"CREATE SCHEMA IF NOT EXISTS {self.schema}")
         tables = ["yellow", "green", "fhv"]
         if not is_databricks_notebook():
-            # TODO what type of lineage record it will have?
-            warnings.warn("copy_to_current() invoked outside notebook cannot be auto-detected by Microsoft Purview", UserWarning)
+            warnings.warn("system.access.table_lineage[entity_type==null]: copy_to_current() invoked outside notebook cannot be detected by Microsoft Purview scan", UserWarning)
 
         for table in tables:
             df = self.spark.table(f"{self.catalog}.{schema}.{table}")
