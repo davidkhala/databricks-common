@@ -30,6 +30,8 @@ test = "pytest:main"
 
 [tool.poetry.extras]
 connect = ["databricks-connect", "davidkhala-spark"]
+# TODO how to specify local python package in poetry extra
+# TODO check whether davidkhala.databricks.connect source included without extra
 
 [build-system]
 requires = ["poetry-core"]
