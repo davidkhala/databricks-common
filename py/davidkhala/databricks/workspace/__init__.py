@@ -1,4 +1,5 @@
 import pathlib
+from typing import Iterator
 
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.config import Config
@@ -19,14 +20,11 @@ class Workspace:
             raise FileNotFoundError(CONFIG_PATH + " does not exist")
         return Workspace()
 
-    def clusters(self) -> list[ClusterDetails]:
-        return list(self.client.clusters.list())
+    def clusters(self) -> Iterator[ClusterDetails]:
+        return self.client.clusters.list()
 
-    def cluster_ids(self) -> list[str]:
-        r = []
-        for cluster in self.client.clusters.list():
-            r.append(cluster.cluster_id)
-        return r
+    def cluster_ids(self) -> Iterator[str]:
+        return (cluster.cluster_id for cluster in self.client.clusters.list())
 
     @property
     def config(self) -> Config:

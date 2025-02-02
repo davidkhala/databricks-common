@@ -5,12 +5,15 @@ import os
 from databricks.sdk import WorkspaceClient, errors
 from databricks.sdk.service.catalog import VolumeType
 
+from davidkhala.databricks.workspace import Workspace
+from davidkhala.databricks.workspace.catalog import Schema
+
 
 class Volume:
-    def __init__(self, client: WorkspaceClient, catalog, schema, volume):
-        self.client = client
-        self.catalog = catalog
-        self.schema = schema
+    def __init__(self, w: Workspace, volume=None, schema=None, catalog=None):
+        self.client = w.client
+        self.catalog = catalog or w.catalog
+        self.schema = schema or Schema.default
         self.volume = volume
 
     def list(self):
@@ -83,9 +86,11 @@ class VolumeFS:
     def read(self, relative_path):
         r = self.client.dbfs.read(f"dbfs:/{self.path}/{relative_path}")
         return base64.b64decode(r.data).decode('utf-8')
+
     def download(self, relative_path):
         resp = self.client.files.download(f"{self.path}/{relative_path}")
         return resp.contents.read()
+
     def rm(self, relative_volume_path, recursive=True):
         target_path = f"{self.path}/{relative_volume_path}"
         if recursive:

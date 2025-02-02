@@ -43,7 +43,7 @@ class TableTest(unittest.TestCase):
 class VolumeTest(unittest.TestCase):
     def setUp(self):
         from davidkhala.databricks.workspace.volume import Volume
-        self.v = Volume(w.client, w.catalog, 'default', 'new')
+        self.v = Volume(w, 'new')
         self.fs = self.v.fs
 
     def test_volume_get(self):
@@ -59,17 +59,16 @@ class VolumeTest(unittest.TestCase):
 class VolumeFSTest(unittest.TestCase):
     def setUp(self):
         from davidkhala.databricks.workspace.volume import Volume
-        self.v = Volume(w.client, w.catalog, 'default', 'volume')
+        self.v = Volume(w, 'volume')
         self.v.create()
         self.fs = self.v.fs
 
     def test_fs_upload(self):
         self.fs.upload('self/pyproject.toml')
         print(self.fs.read('pyproject.toml'))
+
     def tearDown(self):
         self.v.delete()
-
-
 
 
 class WarehouseTest(unittest.TestCase):
@@ -106,7 +105,7 @@ class WarehouseTest(unittest.TestCase):
 class CatalogTest(unittest.TestCase):
     def setUp(self):
         self.c = Catalog(w)
-        self.s = Schema(w)
+        self.s = Schema(w, 'test')
 
     def test_get(self):
         _ = self.c.get('not_exists')
@@ -119,7 +118,7 @@ class CatalogTest(unittest.TestCase):
         self.c.delete('test')
 
     def test_schema_create(self):
-        self.s.create('test')
+        self.s.create()
 
     def test_schema_delete(self):
-        self.s.delete('test')
+        self.s.delete()

@@ -13,7 +13,7 @@ class LineageTest(unittest.TestCase):
         from davidkhala.databricks.lineage.rest import API as RESTAPI
         self.api = RESTAPI(w.api_client)
         self.t = Table(w.client)
-        self.spark = DatabricksConnect.get()
+        self.spark, _ = DatabricksConnect.get()
         from notebook.source.azure_open_datasets.nyctlc import NycTLC
 
         instance = NycTLC(self.spark)

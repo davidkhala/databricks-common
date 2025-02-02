@@ -1,0 +1,38 @@
+from databricks.sdk import WorkspaceClient
+from pyspark.sql import DataFrame
+from pyspark.sql.streaming import DataStreamWriter
+
+from davidkhala.databricks.workspace.volume import Volume
+
+
+class Write:
+    stream: DataStreamWriter
+    serverless: bool
+
+    def __init__(self, df: DataFrame, serverless=False):
+        assert df.isStreaming
+        self.stream = df.writeStream
+        self.serverless = serverless
+
+    def with_trigger(self, **kwargs):
+        if self.serverless:
+            self.stream = self.stream.trigger(availableNow=True)
+        else:
+            kwargs.setdefault(
+                'processingTime',
+                '0 seconds'
+            )
+            self.stream = self.stream.trigger(**kwargs)
+        return self.stream
+
+
+class Internal(Write):
+
+    def toTable(self, table_name: str, volume: Volume = None, *, client: WorkspaceClient = None):
+        if volume is None:
+            from davidkhala.databricks.workspace import Workspace
+            volume = Volume(Workspace(client), table_name)
+        volume.create()
+        return (self.with_trigger()
+                .option("checkpointLocation", f"{volume.path}/checkpoint")
+                .toTable(table_name))

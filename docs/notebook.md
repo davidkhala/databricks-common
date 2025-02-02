@@ -5,6 +5,6 @@
 - not supported in cluster’s worker or executor nodes.
 
 runtime context
-- SparkContext: Use RDD API only. Initialized by default as `sc`
+- [sc:SparkContext](https://github.com/davidkhala/spark/tree/main/context)
   - > sc is not supported on serverless compute, consider using `spark` instead. 
-- SparkSession: Initialized by default as `spark`
+- [spark:SparkSession](https://github.com/davidkhala/spark/tree/main/session)

@@ -39,35 +39,38 @@ class Catalog:
 
 
 class Schema:
-    def __init__(self, w: Workspace, catalog: str = None):
+    default = 'default'
+
+    def __init__(self, w: Workspace, name=default, catalog: str = None):
         self.w: Workspace = w
         if not catalog:
             catalog = self.w.catalog
         self.catalog = catalog
+        self.name = name
 
     @property
     def schemas(self):
         return self.w.client.schemas
 
-    def get(self, name='default'):
+    def get(self):
         try:
-            return self.schemas.get(f"{self.catalog}.{name}")
+            return self.schemas.get(f"{self.catalog}.{self.name}")
         except platform.NotFound as e:
-            if str(e) == f"Schema '{self.catalog}.{name}' does not exist.":
+            if str(e) == f"Schema '{self.catalog}.{self.name}' does not exist.":
                 return None
 
-    def create(self, name):
+    def create(self):
         try:
-            return self.schemas.create(name, self.catalog)
+            return self.schemas.create(self.name, self.catalog)
         except platform.BadRequest as e:
-            if str(e) == f"Schema '{name}' already exists":
+            if str(e) == f"Schema '{self.name}' already exists":
                 return
             raise e
 
-    def delete(self, name):
+    def delete(self):
         try:
-            return self.schemas.delete(f"{self.catalog}.{name}", force=True)
+            return self.schemas.delete(f"{self.catalog}.{self.name}", force=True)
         except platform.NotFound as e:
-            if str(e) == f"Schema '{self.catalog}.{name}' does not exist.":
+            if str(e) == f"Schema '{self.catalog}.{self.name}' does not exist.":
                 return None
             raise e

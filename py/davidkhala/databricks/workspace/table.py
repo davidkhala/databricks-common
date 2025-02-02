@@ -1,6 +1,7 @@
 import json
 
 from databricks.sdk import WorkspaceClient
+from databricks.sdk.errors import NotFound
 from databricks.sdk.service.catalog import TableInfo
 from davidkhala.syntax.js import Array
 
@@ -30,7 +31,12 @@ class Table:
         return self.client.tables.list(catalog_name, schema_name)
 
     def delete(self, full_name: str):
-        return self.client.tables.delete(full_name)
+        try:
+            return self.client.tables.delete(full_name)
+        except NotFound as e:
+            if str(e) == f"Table '{full_name}' does not exist.":
+                return
+            raise e
     @staticmethod
     def pretty(table: TableInfo):
         return {

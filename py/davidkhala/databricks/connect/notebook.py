@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
 
-from davidkhala.databricks.connect import SessionDecorator
+from davidkhala.databricks.connect import Session
 from davidkhala.databricks.workspace.path import API
 
 class Index:
@@ -8,7 +8,7 @@ class Index:
 
     def __init__(self, spark: SparkSession):
         self.spark = spark
-        _d = SessionDecorator(spark)
+        _d = Session(spark)
         self.serverless = _d.serverless
         if self.serverless:
             self.schema = _d.schema

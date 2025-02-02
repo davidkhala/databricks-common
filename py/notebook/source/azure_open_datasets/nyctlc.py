@@ -13,25 +13,25 @@ schema = 'nyctlc'
 
 
 class NycTLC(SparkWare):
+    w = Workspace()
+    t = Table(w.client)
+    overwrite: bool = True
 
-    w= Workspace()
-    wc = w.client
-    t = Table(wc)
-    overwrite:bool= True
     def __init__(self, spark_instance=None):
         super().__init__(spark_instance)
         self.schema = schema
         self.catalog = context.catalog
 
         Catalog(self.w).create(self.catalog)
-        Schema(self.w).create(schema)
-
+        Schema(self.w,schema).create()
 
     def copy_to_current(self):
         self.spark.sql(f"CREATE SCHEMA IF NOT EXISTS {self.schema}")
         tables = ["yellow", "green", "fhv"]
         if not is_databricks_notebook():
-            warnings.warn("system.access.table_lineage[entity_type==null]: copy_to_current() invoked outside notebook cannot be detected by Microsoft Purview scan", UserWarning)
+            warnings.warn(
+                "system.access.table_lineage[entity_type==null]: copy_to_current() invoked outside notebook cannot be detected by Microsoft Purview scan",
+                UserWarning)
 
         for table in tables:
             df = self.spark.table(f"{self.catalog}.{schema}.{table}")
@@ -51,8 +51,8 @@ class NycTLC(SparkWare):
 
         catalog = self.catalog
 
-        v = Volume(self.wc, catalog, schema, volume)
-        self.spark.sql(f"CREATE VOLUME IF NOT EXISTS {catalog}.{schema}.{volume}")
+        v = Volume(self.w, volume, schema, catalog)
+        self.spark.sql(f"CREATE VOLUME IF NOT EXISTS {v.full_name}")
 
         for table in tables:
             basename = f"{table}_tripdata_{year}-{month}.parquet"

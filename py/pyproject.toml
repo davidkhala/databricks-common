@@ -9,13 +9,13 @@ packages = [{ include = "davidkhala" }]
 
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.12"
 databricks-sdk = "*"
 davidkhala-utils = "*"
 # for extras
 databricks-connect = { version = "^15", optional = true }
 davidkhala-spark = { version = "*", optional = true }
-
+davidkhala-gcp = { version = "*", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
@@ -25,6 +25,7 @@ test = "pytest:main"
 
 [tool.poetry.extras]
 connect = ["databricks-connect", "davidkhala-spark"]
+gcp = ['davidkhala-gcp']
 
 [build-system]
 requires = ["poetry-core"]

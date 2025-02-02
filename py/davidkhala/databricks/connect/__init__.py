@@ -2,7 +2,7 @@ import os
 
 from databricks.connect import DatabricksSession, cli
 from databricks.sdk.config import Config
-from davidkhala.spark import SessionDecorator as SparkDecorator
+from davidkhala.spark.session import ServerMore
 from pyspark.sql import SparkSession
 
 
@@ -15,13 +15,13 @@ class DatabricksConnect:
         cli.test()
 
     @staticmethod
-    def get() -> SparkSession:
+    def get() -> (SparkSession, bool):
         _builder = DatabricksSession.builder
         try:
-            return _builder.validateSession(True).getOrCreate()
+            return _builder.validateSession(True).getOrCreate(), False
         except Exception as e:
             if str(e) == 'Cluster id or serverless are required but were not specified.':
-                return _builder.serverless(True).getOrCreate()
+                return _builder.serverless(True).getOrCreate(), True
             else:
                 raise e
 
@@ -44,25 +44,31 @@ class DatabricksConnect:
         return _builder.getOrCreate()
 
 
-class SessionDecorator(SparkDecorator):
+class Session(ServerMore):
     @property
     def serverless(self) -> bool:
         # assert on serverless config
         return (
-                self.cluster_id is None
+                self.clusterId is None
                 and self.conf.get('spark.sql.ansi.enabled') == 'true'
                 and self.conf.get('spark.sql.shuffle.partitions', ) == 'auto'
                 and self.conf.__len__() == 2
         )
 
     @property
-    def cluster_id(self) -> str | None:
+    def appName(self):
+        if not self.serverless:
+            return super().appName
+
+    @property
+    def clusterId(self) -> str | None:
         return self.conf.get("spark.databricks.clusterUsageTags.clusterId")
 
-    def is_servermore(self, cluster_id) -> bool:
+    def is_servermore(self, cluster_id: str = None) -> bool:
+        cluster_check = self.clusterId == cluster_id if cluster_id else self.clusterId is not None
         return (
                 self.serverless is False
-                and self.cluster_id == cluster_id
+                and cluster_check
                 and self.conf.__len__() > 427
         )
 
