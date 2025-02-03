@@ -34,6 +34,7 @@ class PubSub:
             privateKeyId=info.get('private_key_id'),
             projectId=info.get('project_id'),
         )
+        return self
 
     def read_stream(self, topic_id, subscription_id):
         stream_reader: DataStreamReader = (

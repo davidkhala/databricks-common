@@ -8,6 +8,7 @@ from davidkhala.databricks.gcp.pubsub import PubSub
 from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.server import Cluster
 from tests.servermore import get
+from tests.stream import to_table, tearDown
 
 
 class PubSubTestCase(unittest.TestCase):
@@ -26,11 +27,11 @@ class PubSubTestCase(unittest.TestCase):
 
         OptionsInterface.token.fget(_)
 
-        w = Workspace()
-        spark, self.controller = get(w)
+        self.w = Workspace()
+        self.spark, self.controller = get(self.w)
 
-        self.pubsub = PubSub(None, spark)
-        self.pubsub.with_service_account(info)
+        self.pubsub = PubSub(None, self.spark).with_service_account(info)
+
         self.controller.start()
 
     def test_read_stream(self):
@@ -39,16 +40,15 @@ class PubSubTestCase(unittest.TestCase):
         df = self.pubsub.read_stream(topic_id, subscription_id)
         df.printSchema()
         # TODO WIP the show does not work
-        self.pubsub.show(df, 10)
+        # self.pubsub.show(df, 10)
+        to_table(df, 'pubsub', self.w, self.spark)
 
     def test_read_batch(self):
         # TODO
         pass
 
     def tearDown(self):
-        self.pubsub.disconnect()
-        # self.controller.stop()
-        pass
+        tearDown(self.spark, self.controller)
 
 
 if __name__ == '__main__':
