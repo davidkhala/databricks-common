@@ -10,6 +10,7 @@ from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.server import Cluster
 from davidkhala.databricks.workspace.table import Table
 from davidkhala.databricks.workspace.volume import Volume
+from tests.servermore import get
 
 
 class SampleStreamTestCase(unittest.TestCase):
@@ -17,42 +18,28 @@ class SampleStreamTestCase(unittest.TestCase):
     controller: Optional[Cluster]
     spark: SparkSession
 
-    def servermore(self) -> SparkSession:
-        clusters = self.w.cluster_ids()
-        assert len(clusters) > 0
-        from davidkhala.databricks.workspace.server import Cluster
-        cluster_id = clusters[0]
-        print(cluster_id)
-        self.controller = Cluster(self.w.client, cluster_id)
+    def servermore(self):
+        self.spark, self.controller = get(self.w)
         self.controller.start()
-
-        self.w.config.cluster_id = cluster_id
-
-        spark = DatabricksConnect.from_servermore(self.w.config)
-        self.w.config.cluster_id = None
-        self.spark = spark
-        return spark
 
     def serverless(self):
         spark, serverless = DatabricksConnect.get()
         assert serverless
         self.spark = spark
-        return spark
 
     def setUp(self):
         self.controller = None
-    def test_sample_on_serverless(self):
-        spark = self.serverless()
 
-        r = self.test_sample(spark, True)
+    def test_sample_on_serverless(self):
+        self.serverless()
+
+        r = self.test_sample(self.spark, True)
         self.assertEqual(0, r.count())
 
-
     def test_sample_on_servermore(self):
-        spark = self.servermore()
-        r = self.test_sample(spark, False)
+        self.servermore()
+        r = self.test_sample(self.spark, False)
         self.assertGreater(r.count(), 0)
-
 
     def test_sample(self, spark, serverless):
         df = sample(spark)

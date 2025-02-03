@@ -2,37 +2,35 @@ import os
 import unittest
 
 from davidkhala.gcp.auth import OptionsInterface
-from davidkhala.gcp.auth.options import from_service_account
+from davidkhala.gcp.auth.service_account import from_service_account, Info
 
-from davidkhala.databricks.gcp.pubsub import AuthOptions, PubSub
+from davidkhala.databricks.gcp.pubsub import PubSub
 from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.server import Cluster
 from tests.servermore import get
 
 
 class PubSubTestCase(unittest.TestCase):
-    auth = AuthOptions(
-        clientId=os.environ.get('CLIENT_ID'),
-        privateKey=os.environ.get('PRIVATE_KEY'),
-        clientEmail=os.environ.get('CLIENT_EMAIL'),
-        privateKeyId=os.environ.get('PRIVATE_KEY_ID'),
-        projectId=os.environ.get('PROJECT_ID'),
-    )
     controller: Cluster
 
     def setUp(self):
+        private_key = os.environ.get('PRIVATE_KEY')
 
-        _ = from_service_account(
-            client_email=self.auth.get('clientEmail'),
-            private_key=self.auth.get('privateKey'),
-            project_id=self.auth.get('projectId'),
+        info = Info(
+            client_email=os.environ.get('CLIENT_EMAIL'),
+            private_key=private_key,
+            client_id=os.environ.get('CLIENT_ID'),
+            private_key_id=os.environ.get('PRIVATE_KEY_ID')
         )
+        _ = from_service_account(info)
+
         OptionsInterface.token.fget(_)
 
         w = Workspace()
         spark, self.controller = get(w)
 
-        self.pubsub = PubSub(self.auth, spark)
+        self.pubsub = PubSub(None, spark)
+        self.pubsub.with_service_account(info)
         self.controller.start()
 
     def test_read_stream(self):
@@ -51,6 +49,7 @@ class PubSubTestCase(unittest.TestCase):
         self.pubsub.disconnect()
         # self.controller.stop()
         pass
+
 
 if __name__ == '__main__':
     unittest.main()
