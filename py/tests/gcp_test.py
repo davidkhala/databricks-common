@@ -16,13 +16,13 @@ class PubSubTestCase(unittest.TestCase):
 
     def setUp(self):
         private_key = os.environ.get('PRIVATE_KEY')
-
         info = Info(
             client_email=os.environ.get('CLIENT_EMAIL'),
             private_key=private_key,
             client_id=os.environ.get('CLIENT_ID'),
             private_key_id=os.environ.get('PRIVATE_KEY_ID')
         )
+
         _ = from_service_account(info)
 
         OptionsInterface.token.fget(_)
@@ -33,6 +33,7 @@ class PubSubTestCase(unittest.TestCase):
         self.pubsub = PubSub(None, self.spark).with_service_account(info)
 
         self.controller.start()
+        print('setup completed')
 
     def test_read_stream(self):
         topic_id = 'databricks'
@@ -40,8 +41,10 @@ class PubSubTestCase(unittest.TestCase):
         df = self.pubsub.read_stream(topic_id, subscription_id)
         df.printSchema()
         # TODO WIP the show does not work
-        # self.pubsub.show(df, 10)
-        to_table(df, 'pubsub', self.w, self.spark)
+        # self.pubsub.show(df, 30)
+
+        r = to_table(df, 'pubsub', self.w, self.spark, 30)
+        r.show()  # TODO This works, next step is automate pubsub sending in parallel
 
     def test_read_batch(self):
         # TODO

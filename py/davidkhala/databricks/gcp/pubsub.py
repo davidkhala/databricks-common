@@ -52,6 +52,7 @@ class PubSub:
     def show(self, pubsub_df: DataFrame, timeout=0):
         assert pubsub_df.isStreaming == True
         # TODO
+        print('stream start')
         query: StreamingQuery = (
             pubsub_df.writeStream
             .foreachBatch(lambda df, batch_id: df.show())

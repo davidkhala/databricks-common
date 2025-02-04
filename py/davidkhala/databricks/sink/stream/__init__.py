@@ -1,3 +1,5 @@
+from typing import Callable
+
 from databricks.sdk import WorkspaceClient
 from pyspark.sql import DataFrame
 from pyspark.sql.streaming import DataStreamWriter
@@ -27,12 +29,15 @@ class Write:
 
 
 class Internal(Write):
+    onStart: Callable
 
     def toTable(self, table_name: str, volume: Volume = None, *, client: WorkspaceClient = None):
         if volume is None:
             from davidkhala.databricks.workspace import Workspace
             volume = Volume(Workspace(client), table_name)
         volume.create()
-        return (self.with_trigger()
-                .option("checkpointLocation", f"{volume.path}/checkpoint")
-                .toTable(table_name))
+
+        writer: DataStreamWriter = self.with_trigger().option("checkpointLocation", f"{volume.path}/checkpoint")
+        if self.onStart:
+            self.onStart(self, writer)
+        return writer.toTable(table_name)
