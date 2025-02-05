@@ -1,6 +1,6 @@
 from typing import TypedDict
 
-from davidkhala.gcp.auth.service_account import Info
+from davidkhala.gcp.auth.service_account import ServiceAccount
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.streaming import DataStreamReader, DataStreamWriter, StreamingQuery
 
@@ -26,7 +26,7 @@ class PubSub:
         assert Session(spark).is_servermore()  # Not support in serverless compute
         self.spark = spark
 
-    def with_service_account(self, info: Info):
+    def with_service_account(self, info: ServiceAccount.Info):
         self.auth = AuthOptions(
             clientId=info.get('client_id'),
             clientEmail=info.get('client_email'),

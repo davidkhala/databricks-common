@@ -3,7 +3,7 @@ from databricks.sdk.runtime import dbutils, spark
 # Databricks notebook source
 # This notebook will run continuously to listen for any messages coming to the Pub/Sub topic
 
-dbutils.widgets.text("subscriptionId", "community")
+dbutils.widgets.text("subscriptionId", "spark")
 dbutils.widgets.text("topicId", "databricks")
 dbutils.widgets.text("projectId", "gcp-data-davidkhala")
 

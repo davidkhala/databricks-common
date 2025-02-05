@@ -2,6 +2,7 @@ from typing import Callable
 
 from databricks.sdk import WorkspaceClient
 from pyspark.sql import DataFrame
+from pyspark.sql.connect.streaming.query import StreamingQuery
 from pyspark.sql.streaming import DataStreamWriter
 
 from davidkhala.databricks.workspace.volume import Volume
@@ -31,7 +32,7 @@ class Write:
 class Internal(Write):
     onStart: Callable
 
-    def toTable(self, table_name: str, volume: Volume = None, *, client: WorkspaceClient = None):
+    def toTable(self, table_name: str, volume: Volume = None, *, client: WorkspaceClient = None) -> StreamingQuery:
         if volume is None:
             from davidkhala.databricks.workspace import Workspace
             volume = Volume(Workspace(client), table_name)
