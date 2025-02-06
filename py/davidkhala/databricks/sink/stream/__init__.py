@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Any
 
 from databricks.sdk import WorkspaceClient
 from pyspark.sql import DataFrame
@@ -30,7 +30,7 @@ class Write:
 
 
 class Internal(Write):
-    onStart: Callable
+    onStart: Callable[[Write, DataStreamWriter], Any] = None
 
     def toTable(self, table_name: str, volume: Volume = None, *, client: WorkspaceClient = None) -> StreamingQuery:
         if volume is None:

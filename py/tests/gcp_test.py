@@ -1,10 +1,15 @@
 import os
 import unittest
+from datetime import datetime
+from time import sleep
+from typing import cast
 
 from davidkhala.gcp.auth import OptionsInterface
 from davidkhala.gcp.auth.service_account import from_service_account, ServiceAccount
 from davidkhala.gcp.pubsub.pub import Pub
 from davidkhala.gcp.pubsub.sub import Sub
+from google.cloud.pubsub_v1.subscriber.message import Message
+from pyspark.errors.exceptions.connect import AnalysisException
 
 from davidkhala.databricks.gcp.pubsub import PubSub
 from davidkhala.databricks.workspace import Workspace
@@ -15,6 +20,8 @@ from tests.stream import to_table, tearDown
 
 class PubSubTestCase(unittest.TestCase):
     controller: Cluster
+    topic_id = 'databricks'
+    subscription_id = 'spark'
 
     def setUp(self):
         private_key = os.environ.get('PRIVATE_KEY')
@@ -35,29 +42,73 @@ class PubSubTestCase(unittest.TestCase):
         self.pubsub = PubSub(None, self.spark).with_service_account(info)
 
         self.controller.start()
-        print('setup completed')
+        print('PubSubTestCase setUp: completed')
+
+    def test_read_headless(self):
+        df = self.pubsub.read_stream(self.topic_id, self.subscription_id)
+        pub = Pub(self.topic_id, self.auth)
+        pub.publish_async('hello world')
+        # TODO WIP python version 3.12 exact match
+        self.pubsub.show(df, 30)
+
+    message: str
+    to_be_ack: Message = None
+
+    def write_to_table(self, timeout, finality):
+        df = self.pubsub.read_stream(self.topic_id, self.subscription_id)
+
+        def on_start(*args):
+            pub = Pub(self.topic_id, self.auth)
+
+            self.message = f"hello world at {datetime.now().timestamp()}"
+            if finality:
+                sub = Sub(self.subscription_id, self.topic_id, self.auth)
+                msg_id = pub.publish(self.message)
+                print('pubsub: published ' + msg_id)
+
+                def on_event(message: Message, future):
+                    print(message.data)
+                    # Not to message.ack(): otherwise databricks cannot receive data
+                    self.to_be_ack = message
+                    future.cancel()
+
+                sub.listen(on_event)
+                sub.disconnect()
+            else:
+                pub.publish_async(self.message)
+
+        table = 'pubsub'
+        r = to_table(df, table, self.w, self.spark, timeout,
+                     on_start=on_start
+                     )
+        poll_count = 1
+        while r.count() == 0:
+            sleep(1)
+            print(f"poll...{poll_count}")
+            poll_count += 1
+            r = self.spark.sql('select * from ' + table)
+        if self.to_be_ack:
+            self.to_be_ack.ack()
+        return r
 
     def test_read_stream(self):
-        topic_id = 'databricks'
-        subscription_id = 'spark'
-        df = self.pubsub.read_stream(topic_id, subscription_id)
-        df.printSchema()
 
-        # TODO WIP the show does not work
-        # self.pubsub.show(df, 30)
+        r = self.write_to_table(1, False)
 
-        def on_start(query, ):
-            pub = Pub(topic_id, self.auth)
-            sub = Sub(subscription_id, topic_id, self.auth)
-            pub.publish_async('hello world')
-            sub.listen()
-
-        r = to_table(df, 'pubsub', self.w, self.spark, 10, on_start)
-        r.show()  # TODO This works, next step is automate pubsub sending in parallel
+        self.assertGreaterEqual(1, r.count())
+        self.assertEqual(self.message, cast(bytearray, r.first()['payload']).decode('utf-8'))
 
     def test_read_batch(self):
-        # TODO
-        pass
+
+        df = (self.spark.read.format("pubsub")
+              .option("subscriptionId", self.subscription_id)
+              .option("topicId", self.topic_id)
+              .options(**self.pubsub.auth)
+              .load()
+              )
+
+        with self.assertRaisesRegex(AnalysisException, "pubsub is not a valid Spark SQL Data Source."):
+            df.printSchema()
 
     def tearDown(self):
         tearDown(self.spark, self.controller)

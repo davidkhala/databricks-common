@@ -49,13 +49,17 @@ class PubSub:
         assert pubsub_df.isStreaming == True
         return pubsub_df
 
-    def show(self, pubsub_df: DataFrame, timeout=0):
+    @staticmethod
+    def show(pubsub_df: DataFrame, timeout=0):
+        """
+        This mandates Python version in client and server are EXACTLY same
+        """
         assert pubsub_df.isStreaming == True
-        # TODO
+
         print('stream start')
         query: StreamingQuery = (
             pubsub_df.writeStream
-            .foreachBatch(lambda df, batch_id: df.show())
+            .foreach(lambda row: print(row))
             .start()
         )
         query.awaitTermination(timeout)
