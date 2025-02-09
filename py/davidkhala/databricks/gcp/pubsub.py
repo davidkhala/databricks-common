@@ -49,20 +49,6 @@ class PubSub:
         assert pubsub_df.isStreaming == True
         return pubsub_df
 
-    @staticmethod
-    def show(pubsub_df: DataFrame, timeout=0):
-        """
-        This mandates Python version in client and server are EXACTLY same
-        """
-        assert pubsub_df.isStreaming == True
-
-        print('stream start')
-        query: StreamingQuery = (
-            pubsub_df.writeStream
-            .foreach(lambda row: print(row))
-            .start()
-        )
-        query.awaitTermination(timeout)
 
     def disconnect(self):
         self.spark.stop()

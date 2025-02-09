@@ -44,13 +44,6 @@ class PubSubTestCase(unittest.TestCase):
         self.controller.start()
         print('PubSubTestCase setUp: completed')
 
-    def test_read_headless(self):
-        df = self.pubsub.read_stream(self.topic_id, self.subscription_id)
-        pub = Pub(self.topic_id, self.auth)
-        pub.publish_async('hello world')
-        # TODO WIP python version 3.12 exact match
-        self.pubsub.show(df, 30)
-
     message: str
     to_be_ack: Message = None
 
