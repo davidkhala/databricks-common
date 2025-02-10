@@ -29,10 +29,10 @@ class Write:
         return self.stream
 
 
-class Internal(Write):
+class Table(Write):
     onStart: Callable[[Write, DataStreamWriter], Any] = None
 
-    def toTable(self, table_name: str, volume: Volume = None, *, client: WorkspaceClient = None) -> StreamingQuery:
+    def persist(self, table_name: str, volume: Volume = None, *, client: WorkspaceClient = None) -> StreamingQuery:
         if volume is None:
             from davidkhala.databricks.workspace import Workspace
             volume = Volume(Workspace(client), table_name)
@@ -42,3 +42,9 @@ class Internal(Write):
         if self.onStart:
             self.onStart(self, writer)
         return writer.toTable(table_name)
+
+    def memory(self, queryName: str) -> StreamingQuery:
+        writer: DataStreamWriter = self.stream.format("memory").queryName(queryName)
+        if self.onStart:
+            self.onStart(self, writer)
+        return writer.start()

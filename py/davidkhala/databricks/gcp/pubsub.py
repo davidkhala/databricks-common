@@ -17,14 +17,15 @@ class AuthOptions(TypedDict):
 
 class PubSub:
     auth: AuthOptions
-    spark: SparkSession
+    spark: Session | SparkSession
     source: DataStreamReader
     sink: DataStreamWriter
 
     def __init__(self, auth: AuthOptions | None, spark: SparkSession):
         self.auth = auth
-        assert Session(spark).is_servermore()  # Not support in serverless compute
-        self.spark = spark
+        s = Session(spark)
+        assert s.is_servermore()  # Not support in serverless compute
+        self.spark = s
 
     def with_service_account(self, info: ServiceAccount.Info):
         self.auth = AuthOptions(
@@ -36,10 +37,15 @@ class PubSub:
         )
         return self
 
-    def read_stream(self, topic_id, subscription_id):
+    def read_stream(self, topic_id, subscription_id=None):
+        _sub_id = subscription_id
+        if subscription_id is None:
+            _sub_id = self.spark.appName
+
         stream_reader: DataStreamReader = (
             self.spark.readStream.format("pubsub")
-            .option("subscriptionId", subscription_id)
+            .option('deleteSubscriptionOnStreamStop', subscription_id is None)
+            .option("subscriptionId", _sub_id)
             .option("topicId", topic_id)
             .options(**self.auth)
         )
@@ -49,6 +55,5 @@ class PubSub:
         assert pubsub_df.isStreaming == True
         return pubsub_df
 
-
     def disconnect(self):
-        self.spark.stop()
+        self.spark.disconnect()

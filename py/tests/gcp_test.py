@@ -1,21 +1,19 @@
 import os
 import unittest
 from datetime import datetime
-from time import sleep
 from typing import cast
 
 from davidkhala.gcp.auth import OptionsInterface
 from davidkhala.gcp.auth.service_account import from_service_account, ServiceAccount
 from davidkhala.gcp.pubsub.pub import Pub
 from davidkhala.gcp.pubsub.sub import Sub
-from google.cloud.pubsub_v1.subscriber.message import Message
 from pyspark.errors.exceptions.connect import AnalysisException
 
 from davidkhala.databricks.gcp.pubsub import PubSub
 from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.server import Cluster
 from tests.servermore import get
-from tests.stream import to_table, tearDown
+from tests.stream import to_table, tearDown, wait_data, to_memory
 
 
 class PubSubTestCase(unittest.TestCase):
@@ -33,7 +31,8 @@ class PubSubTestCase(unittest.TestCase):
         )
 
         self.auth = from_service_account(info)
-
+        self.pub = Pub(self.topic_id, self.auth)
+        self.sub = Sub(self.subscription_id, self.topic_id, self.auth)
         OptionsInterface.token.fget(self.auth)
 
         self.w = Workspace()
@@ -45,54 +44,30 @@ class PubSubTestCase(unittest.TestCase):
         print('PubSubTestCase setUp: completed')
 
     message: str
-    to_be_ack: Message = None
 
-    def write_to_table(self, timeout, finality):
+    def on_start(self,*args):
+        self.message = f"hello world at {datetime.now().timestamp()}"
+        self.pub.publish(self.message)
+    def test_sink_table(self):
         df = self.pubsub.read_stream(self.topic_id, self.subscription_id)
 
-        def on_start(*args):
-            pub = Pub(self.topic_id, self.auth)
-
-            self.message = f"hello world at {datetime.now().timestamp()}"
-            if finality:
-                sub = Sub(self.subscription_id, self.topic_id, self.auth)
-                msg_id = pub.publish(self.message)
-                print('pubsub: published ' + msg_id)
-
-                def on_event(message: Message, future):
-                    print(message.data)
-                    # Not to message.ack(): otherwise databricks cannot receive data
-                    self.to_be_ack = message
-                    future.cancel()
-
-                sub.listen(on_event)
-                sub.disconnect()
-            else:
-                pub.publish_async(self.message)
-
         table = 'pubsub'
-        r = to_table(df, table, self.w, self.spark, timeout,
-                     on_start=on_start
-                     )
-        poll_count = 1
-        while r.count() == 0:
-            sleep(1)
-            print(f"poll...{poll_count}")
-            poll_count += 1
-            r = self.spark.sql('select * from ' + table)
-        if self.to_be_ack:
-            self.to_be_ack.ack()
-        return r
+        query, _sql = to_table(df, table, self.w, self.spark, on_start=self.on_start)
 
-    def test_read_stream(self):
+        r = wait_data(self.spark, _sql)
 
-        r = self.write_to_table(1, False)
+        self.assertGreaterEqual(r.count(), 1)
+        self.assertEqual(self.message, cast(bytearray, r.first()['payload']).decode('utf-8'))
+    def test_sink_memory(self):
+        df = self.pubsub.read_stream(self.topic_id)
 
-        self.assertGreaterEqual(1, r.count())
+        query, _sql = to_memory(df, self.spark, on_start=self.on_start)
+
+        r = wait_data(self.spark, _sql)
+        self.assertGreaterEqual(r.count(), 1)
         self.assertEqual(self.message, cast(bytearray, r.first()['payload']).decode('utf-8'))
 
     def test_read_batch(self):
-
         df = (self.spark.read.format("pubsub")
               .option("subscriptionId", self.subscription_id)
               .option("topicId", self.topic_id)
@@ -105,6 +80,7 @@ class PubSubTestCase(unittest.TestCase):
 
     def tearDown(self):
         tearDown(self.spark, self.controller)
+        self.sub.purge()
 
 
 if __name__ == '__main__':
