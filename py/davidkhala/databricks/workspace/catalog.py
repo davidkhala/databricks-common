@@ -1,12 +1,10 @@
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.errors import platform
 
+from davidkhala.databricks.workspace.types import ClientWare
 
-class Catalog:
-    client: WorkspaceClient
 
-    def __init__(self, client: WorkspaceClient):
-        self.client = client
+class Catalog(ClientWare):
 
     @property
     def catalogs(self):

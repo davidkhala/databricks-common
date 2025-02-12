@@ -1,14 +1,19 @@
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.sql import StatementState, StatementResponse
 
+from davidkhala.databricks.workspace.types import ClientWare
 
-class Warehouse:
+
+class Warehouse(ClientWare):
+    warehouse_id: str
+
     def __init__(self, client: WorkspaceClient, warehouse_id: str = None):
         """
         :param client:
         :param warehouse_id: e.g. '7969d92540da7f02'
         """
-        self.client, self.warehouse_id = [client, warehouse_id]
+        super().__init__(client)
+        self.warehouse_id = warehouse_id
 
     def get_one(self):
         for warehouse in self.ls():

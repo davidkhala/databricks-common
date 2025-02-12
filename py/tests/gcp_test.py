@@ -40,9 +40,6 @@ class PubSubTestCase(unittest.TestCase):
 
         self.pubsub = PubSub(None, self.spark).with_service_account(info)
 
-        self.controller.start()
-        print('PubSubTestCase setUp: completed')
-
     message: str
 
     def on_start(self, *args):
@@ -50,6 +47,7 @@ class PubSubTestCase(unittest.TestCase):
         self.pub.publish(self.message)
 
     def test_sink_table(self):
+        self.controller.start()
         df = self.pubsub.read_stream(self.topic_id, self.subscription_id)
 
         table = 'pubsub'
@@ -60,8 +58,18 @@ class PubSubTestCase(unittest.TestCase):
         self.assertGreaterEqual(r.count(), 1)
         self.assertEqual(self.message, cast(bytearray, r.first()['payload']).decode('utf-8'))
 
+    def test_service_principle_permission(self):
+        # TODO, this take longer than expect
+        import uuid
+        sub_id = f"topic_{uuid.uuid4().hex}"
+        self.sub.subscription = sub_id
+        self.sub.create()
+        self.sub.delete()
+
     def test_sink_memory(self):
-        df = self.pubsub.read_stream(self.topic_id)
+        self.controller.start()
+        df = self.pubsub.read_stream(self.topic_id, self.subscription_id)
+        # FIXME without subscription_id cannot work
 
         _, _sql = to_memory(df, self.spark, on_start=self.on_start)
 
@@ -70,6 +78,7 @@ class PubSubTestCase(unittest.TestCase):
         self.assertEqual(self.message, cast(bytearray, r.first()['payload']).decode('utf-8'))
 
     def test_read_batch(self):
+        self.controller.start()
         df = (self.spark.read.format("pubsub")
               .option("subscriptionId", self.subscription_id)
               .option("topicId", self.topic_id)

@@ -1,15 +1,13 @@
 import warnings
 from typing import Iterator
 
-from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.compute import ClusterDetails
 
+from davidkhala.databricks.workspace.types import ClientWare
 
-class Cluster:
+
+class Cluster(ClientWare):
     cluster_id: str
-    client: WorkspaceClient
-    def __init__(self, client: WorkspaceClient):
-        self.client = client
 
     def clusters(self) -> Iterator[ClusterDetails]:
         return self.client.clusters.list()

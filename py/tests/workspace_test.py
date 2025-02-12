@@ -5,6 +5,7 @@ from davidkhala.syntax.fs import write_json
 
 from davidkhala.databricks.workspace import Workspace, path
 from davidkhala.databricks.workspace.catalog import Catalog, Schema
+from davidkhala.databricks.workspace.job import Job
 from davidkhala.databricks.workspace.warehouse import Warehouse
 
 w = Workspace.from_local()
@@ -122,3 +123,11 @@ class CatalogTest(unittest.TestCase):
 
     def test_schema_delete(self):
         self.s.delete()
+
+
+class JobTest(unittest.TestCase):
+    job = Job(w.client)
+
+    def test_jobs(self):
+        for job in self.job.ls():
+            print(job.job_id)

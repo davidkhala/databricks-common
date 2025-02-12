@@ -1,14 +1,17 @@
 from typing import Iterator
 
-from databricks.sdk import WorkspaceClient
 from databricks.sdk.service.apps import App
 
+from davidkhala.databricks.workspace.types import ClientWare
 
-class SparkApp:
-    def __init__(self, client: WorkspaceClient):
-        self.client = client
+
+class SparkApp(ClientWare):
 
     def ls(self) -> Iterator[App]:
+        """
+        If not found, this will block until get one
+        :return:
+        """
         return self.apps.list()
 
     @property

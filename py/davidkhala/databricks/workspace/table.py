@@ -1,18 +1,16 @@
 import json
 
-from databricks.sdk import WorkspaceClient
 from databricks.sdk.errors import NotFound
 from databricks.sdk.service.catalog import TableInfo
 from davidkhala.syntax.js import Array
 
+from davidkhala.databricks.workspace.types import ClientWare
 
-class Table:
+
+class Table(ClientWare):
     """
     NOTE: table create is not supported by SDK. Use dataframe instead.
     """
-
-    def __init__(self, client: WorkspaceClient):
-        self.client = client
 
     def get(self, full_name: str):
         return Table.pretty(self._get(full_name))
@@ -37,6 +35,7 @@ class Table:
             if str(e) == f"Table '{full_name}' does not exist.":
                 return
             raise e
+
     @staticmethod
     def pretty(table: TableInfo):
         return {

@@ -7,11 +7,12 @@ from databricks.sdk.service.catalog import VolumeType
 
 from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.catalog import Schema
+from davidkhala.databricks.workspace.types import ClientWare
 
 
-class Volume:
+class Volume(ClientWare):
     def __init__(self, w: Workspace, volume=None, schema=None, catalog=None):
-        self.client = w.client
+        super().__init__(w.client)
         self.catalog = catalog or w.catalog
         self.schema = schema or Schema.default
         self.volume = volume
@@ -58,13 +59,13 @@ class Volume:
         return VolumeFS(self.client, self.path)
 
 
-class VolumeFS:
+class VolumeFS(ClientWare):
     """
     https://docs.databricks.com/en/dev-tools/sdk-python.html#manage-files-in-unity-catalog-volumes
     """
 
     def __init__(self, client: WorkspaceClient, volume_root_path):
-        self.client = client
+        super().__init__(client)
         self.path = volume_root_path
 
     def upload(self, local_path, target_path=None, *, overwrite=False):

@@ -6,9 +6,7 @@ from databricks.sdk.service.workspace import ObjectInfo, ObjectType, ImportForma
 from davidkhala.databricks.workspace import APIClient, Workspace
 
 
-class API:
-    def __init__(self, api_client: APIClient):
-        self.api_client = api_client
+class API(APIClient):
 
     def ls(self, path="/"):
         """
@@ -16,7 +14,7 @@ class API:
         :param path:
         :return:
         """
-        return self.api_client.get('/workspace/list', {'path': path})
+        return self.get('/workspace/list', {'path': path})
 
     def scan_notebooks(self, path="/") -> list:
         """

@@ -13,7 +13,7 @@ from tests.stream import to_table, tearDown
 
 class SampleStreamTestCase(unittest.TestCase):
     w = Workspace.from_local()
-    controller: Optional[Cluster]
+    controller: Optional[Cluster] = None
     spark: SparkSession
 
     def servermore(self):
@@ -24,9 +24,6 @@ class SampleStreamTestCase(unittest.TestCase):
         spark, serverless = DatabricksConnect.get()
         assert serverless
         self.spark = spark
-
-    def setUp(self):
-        self.controller = None
 
     def test_sample_on_serverless(self):
         self.serverless()
