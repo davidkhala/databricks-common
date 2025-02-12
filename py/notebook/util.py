@@ -3,7 +3,8 @@ from davidkhala.databricks.workspace.catalog import Schema, Catalog
 
 
 def clear(schema, catalog=None):
-    Schema(Workspace(),schema, catalog).delete()
+    w = Workspace()
+    Schema(w.client,schema, catalog).delete()
     if catalog:
-        Catalog(Workspace()).delete(catalog)
+        Catalog(w.client).delete(catalog)
 

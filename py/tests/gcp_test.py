@@ -45,23 +45,25 @@ class PubSubTestCase(unittest.TestCase):
 
     message: str
 
-    def on_start(self,*args):
+    def on_start(self, *args):
         self.message = f"hello world at {datetime.now().timestamp()}"
         self.pub.publish(self.message)
+
     def test_sink_table(self):
         df = self.pubsub.read_stream(self.topic_id, self.subscription_id)
 
         table = 'pubsub'
-        query, _sql = to_table(df, table, self.w, self.spark, on_start=self.on_start)
+        _, _sql = to_table(df, table, self.w, self.spark, on_start=self.on_start)
 
         r = wait_data(self.spark, _sql)
 
         self.assertGreaterEqual(r.count(), 1)
         self.assertEqual(self.message, cast(bytearray, r.first()['payload']).decode('utf-8'))
+
     def test_sink_memory(self):
         df = self.pubsub.read_stream(self.topic_id)
 
-        query, _sql = to_memory(df, self.spark, on_start=self.on_start)
+        _, _sql = to_memory(df, self.spark, on_start=self.on_start)
 
         r = wait_data(self.spark, _sql)
         self.assertGreaterEqual(r.count(), 1)

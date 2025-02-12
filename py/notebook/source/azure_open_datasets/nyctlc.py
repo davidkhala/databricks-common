@@ -22,8 +22,8 @@ class NycTLC(SparkWare):
         self.schema = schema
         self.catalog = context.catalog
 
-        Catalog(self.w).create(self.catalog)
-        Schema(self.w,schema).create()
+        Catalog(self.w.client).create(self.catalog)
+        Schema(self.w.client,schema).create()
 
     def copy_to_current(self):
         self.spark.sql(f"CREATE SCHEMA IF NOT EXISTS {self.schema}")

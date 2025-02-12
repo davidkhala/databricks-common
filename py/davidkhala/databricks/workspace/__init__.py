@@ -1,12 +1,12 @@
 import pathlib
-from typing import Iterator
 
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.config import Config
-from databricks.sdk.service.compute import ClusterDetails
+from databricks.sdk.core import ApiClient
 
 
 class Workspace:
+    client: WorkspaceClient
 
     def __init__(self, client: WorkspaceClient = None):
         if client is None:
@@ -19,12 +19,6 @@ class Workspace:
         if not pathlib.Path(CONFIG_PATH).exists():
             raise FileNotFoundError(CONFIG_PATH + " does not exist")
         return Workspace()
-
-    def clusters(self) -> Iterator[ClusterDetails]:
-        return self.client.clusters.list()
-
-    def cluster_ids(self) -> Iterator[str]:
-        return (cluster.cluster_id for cluster in self.client.clusters.list())
 
     @property
     def config(self) -> Config:
@@ -43,7 +37,9 @@ class Workspace:
         """
         :return: default catalog name
         """
-        return self.client.settings.default_namespace.get().namespace.value
+        from davidkhala.databricks.workspace.catalog import Catalog
+
+        return Catalog(self.client).default
 
     @property
     def cloud(self):
@@ -78,6 +74,7 @@ class Workspace:
 
 class APIClient:
     api_version = '/api/2.0'
+    client: ApiClient
 
     def __init__(self, client: WorkspaceClient):
         self.client = client.api_client

@@ -60,9 +60,7 @@ class SDK:
     def get_by(self, *, notebook_id: str | int = None, path: str = None) -> str | None:
         for o in self.ls():
             if o.object_type == ObjectType.NOTEBOOK:
-                if notebook_id:
-                    if o.object_id == int(notebook_id):
-                        return o.path
-                if path is not None:
-                    if path in o.path:
-                        return str(o.object_id)
+                if notebook_id and o.object_id == int(notebook_id):
+                    return o.path
+                if path and path in o.path:
+                    return str(o.object_id)

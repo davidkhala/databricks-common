@@ -104,8 +104,8 @@ class WarehouseTest(unittest.TestCase):
 
 class CatalogTest(unittest.TestCase):
     def setUp(self):
-        self.c = Catalog(w)
-        self.s = Schema(w, 'test')
+        self.c = Catalog(w.client)
+        self.s = Schema(w.client, 'test')
 
     def test_get(self):
         _ = self.c.get('not_exists')
