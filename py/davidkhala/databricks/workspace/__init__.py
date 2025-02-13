@@ -3,6 +3,7 @@ import pathlib
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.config import Config
 from databricks.sdk.core import ApiClient
+from databricks.sdk.service.iam import User
 
 
 class Workspace:
@@ -31,6 +32,10 @@ class Workspace:
     @property
     def config_token(self):
         return self.config.as_dict().get('token')
+
+    @property
+    def me(self) -> User:
+        return self.client.current_user.me()
 
     @property
     def catalog(self) -> str:

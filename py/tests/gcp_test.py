@@ -13,31 +13,7 @@ from davidkhala.databricks.gcp.pubsub import PubSub
 from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.server import Cluster
 from tests.servermore import get
-from tests.stream import to_table, tearDown, wait_data, to_memory
-
-
-class ServiceAccountTest(unittest.TestCase):
-    topic_id = 'databricks'
-
-    def setUp(self):
-        private_key = os.environ.get('PRIVATE_KEY')
-        info = ServiceAccount.Info(
-            client_email=os.environ.get(
-                'CLIENT_EMAIL') or 'data-integration@gcp-data-davidkhala.iam.gserviceaccount.com',
-            private_key=private_key,
-            client_id=os.environ.get('CLIENT_ID') or '105034720006001204003',
-            private_key_id=os.environ.get('PRIVATE_KEY_ID') or '48aaad07d7a0285896adb47ebd81ca7907c42d35'
-        )
-
-        self.auth = from_service_account(info)
-        OptionsInterface.token.fget(self.auth)
-
-    def test_permission(self):
-        import uuid
-        sub_id = f"sub{uuid.uuid4().hex}"
-        sub = Sub(sub_id, self.topic_id, self.auth)
-        sub.create()
-        sub.delete()
+from tests.stream import to_table, tear_down, wait_data, to_memory
 
 
 class PubSubTestCase(unittest.TestCase):
@@ -66,32 +42,43 @@ class PubSubTestCase(unittest.TestCase):
         self.pubsub = PubSub(None, self.spark).with_service_account(info)
         self.controller.start()
 
-    message: str
+    message: str | None = None
 
-    def on_start(self, *args):
-        self.message = f"hello world at {datetime.now().timestamp()}"
+    def publish(self):
+        self.message = f"hello world at {datetime.now()}"
         self.pub.publish(self.message)
+        print(f"self.pub.publish({self.message})")
+
+    def test_publish(self):
+        self.publish()
 
     def test_sink_table(self):
         df = self.pubsub.read_stream(self.topic_id, self.subscription_id)
 
         table = 'pubsub'
-        _, _sql = to_table(df, table, self.w, self.spark, on_start=self.on_start)
+        query, _sql = to_table(df, table, self.w, self.spark)
 
-        r = wait_data(self.spark, _sql)
+        r = wait_data(self.spark, _sql, 1, lambda *_: self.on_ready(query))
 
         self.assertGreaterEqual(r.count(), 1)
         self.assertEqual(self.message, cast(bytearray, r.first()['payload']).decode('utf-8'))
 
+    def on_ready(self, query):
+        s = query.status
+        if (
+                s['message'] == 'Waiting for data to arrive'
+                and s['isDataAvailable'] == False
+                and s['isTriggerActive'] == False
+                and not self.message
+        ):
+            self.publish()
+
     def test_sink_memory(self):
         df = self.pubsub.read_stream(self.topic_id)
-        # FIXME without subscription_id cannot work
-        # - The topic can be auto-created
-        # - no data found
 
-        _, _sql = to_memory(df, self.spark, on_start=self.on_start)
+        query, _sql = to_memory(df, self.spark)
 
-        r = wait_data(self.spark, _sql)
+        r = wait_data(self.spark, _sql, 1, lambda *_: self.on_ready(query))
         self.assertGreaterEqual(r.count(), 1)
         self.assertEqual(self.message, cast(bytearray, r.first()['payload']).decode('utf-8'))
 
@@ -108,7 +95,7 @@ class PubSubTestCase(unittest.TestCase):
             df.printSchema()
 
     def tearDown(self):
-        tearDown(self.spark, self.controller)
+        tear_down(self.spark, self.controller)
         self.sub.purge()
 
 

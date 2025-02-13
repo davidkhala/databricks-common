@@ -38,7 +38,7 @@ class Table(Write):
             volume = Volume(Workspace(client), table_name)
         volume.create()
 
-        writer: DataStreamWriter = self.with_trigger().option("checkpointLocation", f"{volume.path}/checkpoint")
+        writer: DataStreamWriter = self.stream.option("checkpointLocation", f"{volume.path}/checkpoint")
         if self.onStart:
             self.onStart(self, writer)
         return writer.toTable(table_name)
