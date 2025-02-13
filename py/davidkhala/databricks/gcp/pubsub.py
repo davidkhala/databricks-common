@@ -40,7 +40,9 @@ class PubSub:
     def read_stream(self, topic_id, subscription_id=None):
         _sub_id = subscription_id
         if subscription_id is None:
-            _sub_id = self.spark.appName
+            import uuid
+            _sub_id = f"databricks{uuid.uuid4().hex}"
+            print(f"use random assigned subscription_id=[{_sub_id}]")
 
         stream_reader: DataStreamReader = (
             self.spark.readStream.format("pubsub")

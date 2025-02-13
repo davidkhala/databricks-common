@@ -16,6 +16,30 @@ from tests.servermore import get
 from tests.stream import to_table, tearDown, wait_data, to_memory
 
 
+class ServiceAccountTest(unittest.TestCase):
+    topic_id = 'databricks'
+
+    def setUp(self):
+        private_key = os.environ.get('PRIVATE_KEY')
+        info = ServiceAccount.Info(
+            client_email=os.environ.get(
+                'CLIENT_EMAIL') or 'data-integration@gcp-data-davidkhala.iam.gserviceaccount.com',
+            private_key=private_key,
+            client_id=os.environ.get('CLIENT_ID') or '105034720006001204003',
+            private_key_id=os.environ.get('PRIVATE_KEY_ID') or '48aaad07d7a0285896adb47ebd81ca7907c42d35'
+        )
+
+        self.auth = from_service_account(info)
+        OptionsInterface.token.fget(self.auth)
+
+    def test_permission(self):
+        import uuid
+        sub_id = f"sub{uuid.uuid4().hex}"
+        sub = Sub(sub_id, self.topic_id, self.auth)
+        sub.create()
+        sub.delete()
+
+
 class PubSubTestCase(unittest.TestCase):
     controller: Cluster
     topic_id = 'databricks'
@@ -24,10 +48,11 @@ class PubSubTestCase(unittest.TestCase):
     def setUp(self):
         private_key = os.environ.get('PRIVATE_KEY')
         info = ServiceAccount.Info(
-            client_email=os.environ.get('CLIENT_EMAIL'),
+            client_email=os.environ.get(
+                'CLIENT_EMAIL') or 'data-integration@gcp-data-davidkhala.iam.gserviceaccount.com',
             private_key=private_key,
-            client_id=os.environ.get('CLIENT_ID'),
-            private_key_id=os.environ.get('PRIVATE_KEY_ID')
+            client_id=os.environ.get('CLIENT_ID') or '105034720006001204003',
+            private_key_id=os.environ.get('PRIVATE_KEY_ID') or '48aaad07d7a0285896adb47ebd81ca7907c42d35'
         )
 
         self.auth = from_service_account(info)
@@ -39,6 +64,7 @@ class PubSubTestCase(unittest.TestCase):
         self.spark, self.controller = get(self.w)
 
         self.pubsub = PubSub(None, self.spark).with_service_account(info)
+        self.controller.start()
 
     message: str
 
@@ -47,7 +73,6 @@ class PubSubTestCase(unittest.TestCase):
         self.pub.publish(self.message)
 
     def test_sink_table(self):
-        self.controller.start()
         df = self.pubsub.read_stream(self.topic_id, self.subscription_id)
 
         table = 'pubsub'
@@ -58,18 +83,11 @@ class PubSubTestCase(unittest.TestCase):
         self.assertGreaterEqual(r.count(), 1)
         self.assertEqual(self.message, cast(bytearray, r.first()['payload']).decode('utf-8'))
 
-    def test_service_principle_permission(self):
-        # TODO, this take longer than expect
-        import uuid
-        sub_id = f"topic_{uuid.uuid4().hex}"
-        self.sub.subscription = sub_id
-        self.sub.create()
-        self.sub.delete()
-
     def test_sink_memory(self):
-        self.controller.start()
-        df = self.pubsub.read_stream(self.topic_id, self.subscription_id)
+        df = self.pubsub.read_stream(self.topic_id)
         # FIXME without subscription_id cannot work
+        # - The topic can be auto-created
+        # - no data found
 
         _, _sql = to_memory(df, self.spark, on_start=self.on_start)
 
