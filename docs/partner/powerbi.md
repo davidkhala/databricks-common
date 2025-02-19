@@ -1,4 +1,4 @@
-Publish to Power BI
+# Publish to Power BI
 > You can use Partner Connect to directly publish to Power BI.
 
 ## requirements
