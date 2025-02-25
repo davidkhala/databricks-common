@@ -4,5 +4,4 @@ https://docs.databricks.com/en/connect/streaming/pub-sub.html
 
 # Limit
 > Pub/Sub might publish duplicate records, and records might arrive to the subscriber out of order. You should write Databricks code to handle duplicate and out-of-order records.
-- For dedup, try [Incremental batch](https://docs.databricks.com/en/connect/streaming/pub-sub.html#incremental-batch-processing-semantics-for-pubsub)
-- TODO in issue #1
+- For dedup, you need to do it in memory table

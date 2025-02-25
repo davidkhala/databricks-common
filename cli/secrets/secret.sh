@@ -1,13 +1,13 @@
 scope=$2
-list(){
+list() {
   databricks secrets list-secrets "$scope"
 }
-put(){
+put() {
   local key=$1
   local secret=$2
-   databricks secrets put-secret "$scope" "$key" --string-secret "$secret"
+  databricks secrets put-secret "$scope" "$key" --string-secret "$secret"
 }
-delete(){
+delete() {
   local key=$1
   databricks secrets delete-secret "$scope" "$key"
 }

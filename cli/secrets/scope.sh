@@ -1,11 +1,11 @@
-create(){
+create() {
   local scope_name=${1:-scope}
   databricks secrets create-scope "$scope_name"
 }
-list(){
+list() {
   databricks secrets list-scopes
 }
-delete(){
+delete() {
   local scope_name=$1
   databricks secrets delete-scope "$scope_name"
 }

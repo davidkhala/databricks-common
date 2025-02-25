@@ -2,7 +2,7 @@ from typing import TypedDict
 
 from davidkhala.gcp.auth.service_account import ServiceAccount
 from pyspark.sql import SparkSession, DataFrame
-from pyspark.sql.streaming import DataStreamReader, DataStreamWriter, StreamingQuery
+from pyspark.sql.connect.streaming.readwriter import DataStreamReader, DataStreamWriter
 
 from davidkhala.databricks.connect import Session
 
@@ -37,6 +37,12 @@ class PubSub:
         )
         return self
 
+    @property
+    def subscription_id(self) -> str | None:
+        if self.source:
+            # Databricks Connect
+            return self.source._options["subscriptionId"]
+
     def read_stream(self, topic_id, subscription_id=None):
         _sub_id = subscription_id
         if subscription_id is None:
@@ -44,16 +50,17 @@ class PubSub:
             _sub_id = f"databricks{uuid.uuid4().hex}"
             print(f"use random assigned subscription_id=[{_sub_id}]")
 
-        stream_reader: DataStreamReader = (
+        self.source = (
             self.spark.readStream.format("pubsub")
             .option('deleteSubscriptionOnStreamStop', subscription_id is None)
             .option("subscriptionId", _sub_id)
             .option("topicId", topic_id)
             .options(**self.auth)
         )
+        return self
 
-        # Set up the streaming DataFrame to listen to the Pub/Sub topic
-        pubsub_df = stream_reader.load()
+    def read_start(self) -> DataFrame:
+        pubsub_df = self.source.load()
         assert pubsub_df.isStreaming == True
         return pubsub_df
 

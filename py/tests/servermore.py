@@ -10,6 +10,8 @@ class Controller(Cluster):
         print(f"cluster({self.cluster_id}) starting...")
         super().start()
         print(f"cluster({self.cluster_id}) started")
+
+
 def get(w=Workspace()) -> (SparkSession, Cluster):
     controller = Controller(w.client)
     assert controller.get_one() is not None

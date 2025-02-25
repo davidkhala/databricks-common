@@ -10,8 +10,9 @@ function Logout
     Remove-Item $env:USERPROFILE/.databrickscfg
 }
 
-function Login-Serverless
+function Connect-Serverless
 {
+    # Login-Serverless
     param (
         [string]$workspace, # workspace instance name
         [string]$pat # Personal access token
@@ -24,15 +25,18 @@ function Login-Serverless
     if ($pat)
     {
         # Use the PAT to configure Databricks CLI
-        echo $pat | databricks configure --token --host "https://$workspace"
+        Write-Output $pat | databricks configure --token --host "https://$workspace"
     }
     else
     {
         # Run Databricks CLI configuration without PAT
         databricks configure
     }
-
+    databricks current-user me # validate
     (Invoke-WebRequest "https://raw.githubusercontent.com/davidkhala/windows-utils/refs/heads/master/editor.ps1" -UseBasicParsing).Content | Invoke-Expression
     Append $env:USERPROFILE/.databrickscfg serverless_compute_id=auto
 }
-Invoke-Expression ($args -join " ")
+if ($args.Count -gt 0)
+{
+    Invoke-Expression ($args -join " ")
+}

@@ -27,5 +27,5 @@ class Cluster(ClientWare):
         self.client.clusters.delete_and_wait(self.cluster_id)
 
     def pollute(self):
-        warnings.warn(f"workspace.config.cluster_id changes {self.client.config.cluster_id}->{self.cluster_id}")
+        warnings.warn(f"workspace.config.cluster_id from {self.client.config.cluster_id} to {self.cluster_id}")
         self.client.config.cluster_id = self.cluster_id

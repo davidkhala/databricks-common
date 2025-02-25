@@ -35,12 +35,8 @@ def to_table(df: DataFrame, table, w: Workspace, spark: SparkSession):
     return query, f"select * from {table}"
 
 
-def to_memory(df: DataFrame, spark: SparkSession):
-    t = SinkTable(df, Session(spark).serverless)
-    mem_table = "streaming_memory_table"
-    query = t.memory(mem_table)
+mem_table = "streaming_memory_table"
 
-    return query, f"select * from {mem_table}"
 
 
 def tear_down(spark: SparkSession, cluster: Cluster = None):
