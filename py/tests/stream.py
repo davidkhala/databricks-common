@@ -18,7 +18,8 @@ def wait_data(spark, _sql, poll_count=1, interceptor: Callable[[DataFrame, int],
     if r.count() == 0:
         sleep(1)
         if interceptor:
-            interceptor(r, poll_count)
+            signal = interceptor(r, poll_count)
+            if signal: return
         print(f"poll...{poll_count}")
         return wait_data(spark, _sql, poll_count + 1, interceptor)
     else:
@@ -36,7 +37,6 @@ def to_table(df: DataFrame, table, w: Workspace, spark: SparkSession):
 
 
 mem_table = "streaming_memory_table"
-
 
 
 def tear_down(spark: SparkSession, cluster: Cluster = None):

@@ -85,7 +85,6 @@ class PubSubTestCase(unittest.TestCase):
     def sink_memory(self, random_sub, with_trigger):
 
         if with_trigger:
-            # TODO delete the sub
             self.publish()
         self.pubsub.read_stream(self.topic_id, self.subscription_id if not random_sub else None)
         df = self.pubsub.read_start()
