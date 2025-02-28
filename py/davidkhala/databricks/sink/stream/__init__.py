@@ -11,26 +11,26 @@ from davidkhala.databricks.workspace.volume import Volume
 class Write:
     stream: DataStreamWriter
     serverless: bool
+    onStart: Callable[["Write", DataStreamWriter], Any] = None
 
     def __init__(self, df: DataFrame, serverless=False):
         assert df.isStreaming
         self.stream = df.writeStream
         self.serverless = serverless
 
-    def with_trigger(self, **kwargs):
+    def with_trigger(self, **option):
         if self.serverless:
             self.stream = self.stream.trigger(availableNow=True)
         else:
-            kwargs.setdefault(
-                'processingTime',
-                '0 seconds'
-            )
-            self.stream = self.stream.trigger(**kwargs)
+            if option is None:
+                option = {
+                    'processingTime': '0 seconds'
+                }
+            self.stream = self.stream.trigger(**option)
         return self.stream
 
 
 class Table(Write):
-    onStart: Callable[[Write, DataStreamWriter], Any] = None
 
     def persist(self, table_name: str, volume: Volume = None, *, client: WorkspaceClient = None) -> StreamingQuery:
         if volume is None:

@@ -7,12 +7,12 @@ from davidkhala.databricks.workspace.server import Cluster
 
 class Controller(Cluster):
     def start(self):
-        print(f"cluster({self.cluster_id}) starting...")
+        print(f"cluster [{self.cluster_id}] starting...")
         super().start()
-        print(f"cluster({self.cluster_id}) started")
+        print(f"cluster [{self.cluster_id}] started")
 
 
-def get(w=Workspace()) -> (SparkSession, Cluster):
+def get(w=Workspace()) -> (SparkSession, Controller):
     controller = Controller(w.client)
     assert controller.get_one() is not None
     controller.pollute()

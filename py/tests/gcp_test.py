@@ -43,6 +43,7 @@ class PubSubTestCase(unittest.TestCase):
 
         self.pubsub = PubSub(None, self.spark).with_service_account(info)
         self.controller.start()
+        self.sub.create()
 
     message: str | None = None
 
@@ -92,7 +93,7 @@ class PubSubTestCase(unittest.TestCase):
         from davidkhala.databricks.connect import Session
         t = SinkTable(df, Session(self.spark).serverless)
         if with_trigger:
-            t.stream.trigger(availableNow=True)
+            t.with_trigger(availableNow=True)
         query = t.memory(mem_table)
 
         _sql = f"select * from {mem_table}"
@@ -110,7 +111,7 @@ class PubSubTestCase(unittest.TestCase):
         query.stop()
         self.spark.sql(f"DROP TABLE {mem_table}")
         self.message = None
-        self.sub.purge()
+        if not random_sub: self.sub.purge()
 
     def test_cleanup(self):
         self.spark.sql(f"DROP TABLE IF EXISTS {mem_table}")
@@ -118,11 +119,11 @@ class PubSubTestCase(unittest.TestCase):
 
     def test_read_batch(self):
 
-        source:DataStreamReader = (self.spark.read.format("pubsub")
-                  .option("subscriptionId", self.subscription_id)
-                  .option("topicId", self.topic_id)
-                  .options(**self.pubsub.auth)
-                  )
+        source: DataStreamReader = (self.spark.read.format("pubsub")
+                                    .option("subscriptionId", self.subscription_id)
+                                    .option("topicId", self.topic_id)
+                                    .options(**self.pubsub.auth)
+                                    )
         print(source)
         print(source._options)
         df = source.load()
