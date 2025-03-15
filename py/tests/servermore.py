@@ -14,5 +14,5 @@ class Controller(Cluster):
 
 def get(w=Workspace()) -> (SparkSession, Controller):
     controller = Controller(w.client)
-    assert controller.get_one() is not None
+    assert controller.as_one() is not None
     return DatabricksConnect.from_servermore(w.config), controller
