@@ -46,8 +46,9 @@ class Library(ClusterWare):
     def add_async(self, *packages: PythonPyPiLibrary):
         self.client.libraries.install(self.cluster_id, Library.from_pypi(*packages))
 
-    def add(self, package: PythonPyPiLibrary):
+    def add(self, package_name: str):
         self.start()
+        package = PythonPyPiLibrary(package=package_name)
         self.add_async(package)
         status = None
         while status != LibraryInstallStatus.INSTALLED:
@@ -58,8 +59,14 @@ class Library(ClusterWare):
             status = p.status
             if status == LibraryInstallStatus.FAILED: raise RuntimeError(p.messages)
 
-    def uninstall(self, *packages: PythonPyPiLibrary):
-        self.client.libraries.uninstall(self.cluster_id, Library.from_pypi(*packages))
+    def uninstall_a(self, package_name: str):
+        self.uninstall_async(PythonPyPiLibrary(package=package_name))
+
+    def uninstall_async(self, *packages: PythonPyPiLibrary):
+        """
+        The libraries won't be uninstalled until the cluster is restarted
+        """
+        self.client.libraries.uninstall_a(self.cluster_id, Library.from_pypi(*packages))
 
     def get(self, name) -> LibraryFullStatus | None:
         for library in self.list():
