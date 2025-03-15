@@ -11,9 +11,9 @@ class LibraryTestCase(unittest.TestCase):
         client = WorkspaceClient()
         Cluster(client).as_one().pollute()
         library = Library(client)
-        package = PythonPyPiLibrary(package='davidkhala-devops[new-relic]')
-        library.add(package)
-        library.uninstall(package)
+        package_name = 'davidkhala-devops[new-relic]'
+        library.add(package_name)
+        library.uninstall_a(package_name)
 
 
 if __name__ == '__main__':
