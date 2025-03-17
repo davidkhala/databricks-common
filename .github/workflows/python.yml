@@ -1,4 +1,4 @@
-name: Python on push
+name: Python
 
 on:
   workflow_dispatch:
@@ -20,6 +20,7 @@ jobs:
           tests: py/tests/self
   tests:
     runs-on: ubuntu-latest
+    environment: gcp
     steps:
       - uses: actions/checkout@main
       - run: ./cli/setup.sh install

@@ -16,4 +16,5 @@ def get(w=Workspace()) -> (SparkSession, Controller):
     controller = Controller(w.client)
     controller.as_one()
     assert controller.cluster_id is not None
+    controller.pollute()
     return DatabricksConnect.from_servermore(w.config), controller

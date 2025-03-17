@@ -11,7 +11,6 @@ from davidkhala.gcp.pubsub.sub import Sub
 from pyspark.errors.exceptions.connect import AnalysisException
 from pyspark.sql.connect.readwriter import DataFrameReader
 from pyspark.sql.connect.session import SparkSession
-from pyspark.sql.connect.streaming.readwriter import DataStreamReader
 
 from davidkhala.databricks.gcp.pubsub import PubSub
 from davidkhala.databricks.workspace import Workspace
@@ -20,7 +19,6 @@ from tests.servermore import get
 from tests.stream import to_table, wait_data, mem_table
 
 private_key = os.environ.get('PRIVATE_KEY')
-
 info = ServiceAccount.Info(
     client_email=os.environ.get(
         'CLIENT_EMAIL') or 'data-integration@gcp-data-davidkhala.iam.gserviceaccount.com',
@@ -34,9 +32,9 @@ auth = from_service_account(info)
 class PubSubTestCase(unittest.TestCase):
     topic_id = 'databricks'
     subscription_id = 'spark'
-    pub: Pub(topic_id, auth)
-    sub: Sub(subscription_id, topic_id, auth)
-    w: Workspace()
+    pub = Pub(topic_id, auth)
+    sub = Sub(subscription_id, topic_id, auth)
+    w = Workspace()
     controller: Cluster
     spark: SparkSession
     pubsub: PubSub
@@ -57,9 +55,6 @@ class PubSubTestCase(unittest.TestCase):
         self.message = f"hello world at {datetime.now()}"
         PubSubTestCase.pub.publish(self.message)
         warnings.warn(f"self.pub.publish({self.message})")
-
-    def test_publish(self):
-        self.publish()
 
     def test_sink_table(self):
         df = PubSubTestCase.pubsub.read_stream(PubSubTestCase.topic_id, PubSubTestCase.subscription_id).read_start()
@@ -120,10 +115,6 @@ class PubSubTestCase(unittest.TestCase):
         self.message = None
         if not random_sub:
             PubSubTestCase.sub.purge()
-
-    def test_cleanup(self):
-        PubSubTestCase.spark.sql(f"DROP TABLE IF EXISTS {mem_table}")
-        PubSubTestCase.sub.purge()
 
     def test_read_batch(self):
 
