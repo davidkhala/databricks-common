@@ -9,6 +9,7 @@ from davidkhala.gcp.auth.service_account import from_service_account, ServiceAcc
 from davidkhala.gcp.pubsub.pub import Pub
 from davidkhala.gcp.pubsub.sub import Sub
 from pyspark.errors.exceptions.connect import AnalysisException
+from pyspark.sql.connect.readwriter import DataFrameReader
 from pyspark.sql.connect.session import SparkSession
 from pyspark.sql.connect.streaming.readwriter import DataStreamReader
 
@@ -18,33 +19,31 @@ from davidkhala.databricks.workspace.server import Cluster
 from tests.servermore import get
 from tests.stream import to_table, wait_data, mem_table
 
+private_key = os.environ.get('PRIVATE_KEY')
+
+info = ServiceAccount.Info(
+    client_email=os.environ.get(
+        'CLIENT_EMAIL') or 'data-integration@gcp-data-davidkhala.iam.gserviceaccount.com',
+    private_key=private_key,
+    client_id=os.environ.get('CLIENT_ID') or '105034720006001204003',
+    private_key_id=os.environ.get('PRIVATE_KEY_ID') or '48aaad07d7a0285896adb47ebd81ca7907c42d35'
+)
+auth = from_service_account(info)
+
 
 class PubSubTestCase(unittest.TestCase):
-    controller: Cluster
     topic_id = 'databricks'
     subscription_id = 'spark'
-    auth: ServiceAccount
-    pub: Pub
-    sub: Sub
+    pub: Pub(topic_id, auth)
+    sub: Sub(subscription_id, topic_id, auth)
     w: Workspace()
+    controller: Cluster
     spark: SparkSession
     pubsub: PubSub
 
     @classmethod
     def setUpClass(cls):
-        private_key = os.environ.get('PRIVATE_KEY')
-        info = ServiceAccount.Info(
-            client_email=os.environ.get(
-                'CLIENT_EMAIL') or 'data-integration@gcp-data-davidkhala.iam.gserviceaccount.com',
-            private_key=private_key,
-            client_id=os.environ.get('CLIENT_ID') or '105034720006001204003',
-            private_key_id=os.environ.get('PRIVATE_KEY_ID') or '48aaad07d7a0285896adb47ebd81ca7907c42d35'
-        )
-
-        cls.auth = from_service_account(info)
-        cls.pub = Pub(cls.topic_id, cls.auth)
-        cls.sub = Sub(cls.subscription_id, cls.topic_id, cls.auth)
-        OptionsInterface.token.fget(cls.auth)
+        OptionsInterface.token.fget(auth)
 
         cls.spark, cls.controller = get(cls.w)
 
@@ -56,19 +55,19 @@ class PubSubTestCase(unittest.TestCase):
 
     def publish(self):
         self.message = f"hello world at {datetime.now()}"
-        self.pub.publish(self.message)
+        PubSubTestCase.pub.publish(self.message)
         warnings.warn(f"self.pub.publish({self.message})")
 
     def test_publish(self):
         self.publish()
 
     def test_sink_table(self):
-        df = self.pubsub.read_stream(self.topic_id, self.subscription_id).read_start()
+        df = PubSubTestCase.pubsub.read_stream(PubSubTestCase.topic_id, PubSubTestCase.subscription_id).read_start()
 
         table = 'pubsub'
-        query, _sql = to_table(df, table, self.w, self.spark)
+        query, _sql = to_table(df, table, PubSubTestCase.w, PubSubTestCase.spark)
 
-        r = wait_data(self.spark, _sql, 1, lambda *_: self.on_ready(query))
+        r = wait_data(PubSubTestCase.spark, _sql, 1, lambda *_: self.on_ready(query))
 
         self.assertGreaterEqual(r.count(), 1)
         self.assertEqual(self.message, cast(bytearray, r.first()['payload']).decode('utf-8'))
@@ -94,11 +93,12 @@ class PubSubTestCase(unittest.TestCase):
 
         if with_trigger:
             self.publish()
-        self.pubsub.read_stream(self.topic_id, self.subscription_id if not random_sub else None)
-        df = self.pubsub.read_start()
+        PubSubTestCase.pubsub.read_stream(PubSubTestCase.topic_id,
+                                          PubSubTestCase.subscription_id if not random_sub else None)
+        df = PubSubTestCase.pubsub.read_start()
         from davidkhala.databricks.sink.stream import Table as SinkTable
         from davidkhala.databricks.connect import Session
-        t = SinkTable(df, Session(self.spark).serverless)
+        t = SinkTable(df, Session(PubSubTestCase.spark).serverless)
         if with_trigger:
             t.with_trigger(availableNow=True)
         query = t.memory(mem_table)
@@ -116,21 +116,23 @@ class PubSubTestCase(unittest.TestCase):
         self.assertEqual(self.message, cast(bytearray, r.first()['payload']).decode('utf-8'))
         # cleanup
         query.stop()
-        self.spark.sql(f"DROP TABLE {mem_table}")
+        PubSubTestCase.spark.sql(f"DROP TABLE {mem_table}")
         self.message = None
-        if not random_sub: self.sub.purge()
+        if not random_sub:
+            PubSubTestCase.sub.purge()
 
     def test_cleanup(self):
-        self.spark.sql(f"DROP TABLE IF EXISTS {mem_table}")
-        self.sub.purge()
+        PubSubTestCase.spark.sql(f"DROP TABLE IF EXISTS {mem_table}")
+        PubSubTestCase.sub.purge()
 
     def test_read_batch(self):
 
-        source: DataStreamReader = (self.spark.read.format("pubsub")
-                                    .option("subscriptionId", self.subscription_id)
-                                    .option("topicId", self.topic_id)
-                                    .options(**self.pubsub.auth)
-                                    )
+        source: DataFrameReader = (
+            PubSubTestCase.spark.read.format("pubsub")
+            .option("subscriptionId", PubSubTestCase.subscription_id)
+            .option("topicId", PubSubTestCase.topic_id)
+            .options(**PubSubTestCase.pubsub.auth)
+        )
         print(source)
         print(source._options)
         df = source.load()

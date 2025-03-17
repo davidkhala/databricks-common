@@ -1,13 +1,12 @@
-import os
 from time import sleep
 from typing import Callable, Any
 
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql.connect.dataframe import DataFrame
+from pyspark.sql.connect.session import SparkSession
 
 from davidkhala.databricks.connect import Session
 from davidkhala.databricks.sink.stream import Table as SinkTable
 from davidkhala.databricks.workspace import Workspace
-from davidkhala.databricks.workspace.server import Cluster
 from davidkhala.databricks.workspace.table import Table
 from davidkhala.databricks.workspace.volume import Volume
 

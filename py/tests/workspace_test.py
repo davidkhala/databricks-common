@@ -57,19 +57,23 @@ class VolumeTest(unittest.TestCase):
         self.v.delete()
 
 
+from davidkhala.databricks.workspace.volume import Volume
+
+
 class VolumeFSTest(unittest.TestCase):
-    def setUp(self):
-        from davidkhala.databricks.workspace.volume import Volume
-        self.v = Volume(w, 'volume')
-        self.v.create()
-        self.fs = self.v.fs
+    v = Volume(w, 'volume')
+    fs = v.fs
+
+    @classmethod
+    def setUpClass(cls):
+        cls.v.create()
 
     def test_fs_upload(self):
         self.fs.upload('self/pyproject.toml')
         print(self.fs.read('pyproject.toml'))
-
-    def tearDown(self):
-        self.v.delete()
+    @classmethod
+    def tearDownClass(cls):
+        cls.v.delete()
 
 
 class WarehouseTest(unittest.TestCase):

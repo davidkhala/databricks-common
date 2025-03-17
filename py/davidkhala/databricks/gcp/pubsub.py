@@ -1,7 +1,8 @@
 from typing import TypedDict
 
 from davidkhala.gcp.auth.service_account import ServiceAccount
-from pyspark.sql import SparkSession, DataFrame
+from pyspark.sql.connect.dataframe import DataFrame
+from pyspark.sql.connect.session import SparkSession
 from pyspark.sql.connect.streaming.readwriter import DataStreamReader, DataStreamWriter
 
 from davidkhala.databricks.connect import Session
@@ -17,7 +18,7 @@ class AuthOptions(TypedDict):
 
 class PubSub:
     auth: AuthOptions
-    spark: Session | SparkSession
+    spark: Session
     source: DataStreamReader
     sink: DataStreamWriter
 

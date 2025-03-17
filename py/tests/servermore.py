@@ -1,4 +1,4 @@
-from pyspark.sql import SparkSession
+from pyspark.sql.connect.session import SparkSession
 
 from davidkhala.databricks.connect import DatabricksConnect
 from davidkhala.databricks.workspace import Workspace

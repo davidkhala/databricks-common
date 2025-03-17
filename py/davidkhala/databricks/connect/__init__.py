@@ -3,7 +3,7 @@ import os
 from databricks.connect import DatabricksSession, cli
 from databricks.sdk.config import Config
 from davidkhala.spark.session import ServerMore
-from pyspark.sql import SparkSession
+from pyspark.sql.connect.session import SparkSession
 
 
 class DatabricksConnect:

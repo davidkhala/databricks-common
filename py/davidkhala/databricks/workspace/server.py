@@ -66,7 +66,7 @@ class Library(ClusterWare):
         """
         The libraries won't be uninstalled until the cluster is restarted
         """
-        self.client.libraries.uninstall_a(self.cluster_id, Library.from_pypi(*packages))
+        self.client.libraries.uninstall(self.cluster_id, Library.from_pypi(*packages))
 
     def get(self, name) -> LibraryFullStatus | None:
         for library in self.list():
