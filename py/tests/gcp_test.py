@@ -9,21 +9,29 @@ from davidkhala.gcp.auth.service_account import from_service_account, ServiceAcc
 from davidkhala.gcp.pubsub.pub import Pub
 from davidkhala.gcp.pubsub.sub import Sub
 from pyspark.errors.exceptions.connect import AnalysisException
+from pyspark.sql.connect.session import SparkSession
 from pyspark.sql.connect.streaming.readwriter import DataStreamReader
 
 from davidkhala.databricks.gcp.pubsub import PubSub
 from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.server import Cluster
 from tests.servermore import get
-from tests.stream import to_table, tear_down, wait_data, mem_table
+from tests.stream import to_table, wait_data, mem_table
 
 
 class PubSubTestCase(unittest.TestCase):
     controller: Cluster
     topic_id = 'databricks'
     subscription_id = 'spark'
+    auth: ServiceAccount
+    pub: Pub
+    sub: Sub
+    w: Workspace()
+    spark: SparkSession
+    pubsub: PubSub
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         private_key = os.environ.get('PRIVATE_KEY')
         info = ServiceAccount.Info(
             client_email=os.environ.get(
@@ -33,17 +41,16 @@ class PubSubTestCase(unittest.TestCase):
             private_key_id=os.environ.get('PRIVATE_KEY_ID') or '48aaad07d7a0285896adb47ebd81ca7907c42d35'
         )
 
-        self.auth = from_service_account(info)
-        self.pub = Pub(self.topic_id, self.auth)
-        self.sub = Sub(self.subscription_id, self.topic_id, self.auth)
-        OptionsInterface.token.fget(self.auth)
+        cls.auth = from_service_account(info)
+        cls.pub = Pub(cls.topic_id, cls.auth)
+        cls.sub = Sub(cls.subscription_id, cls.topic_id, cls.auth)
+        OptionsInterface.token.fget(cls.auth)
 
-        self.w = Workspace()
-        self.spark, self.controller = get(self.w)
+        cls.spark, cls.controller = get(cls.w)
 
-        self.pubsub = PubSub(None, self.spark).with_service_account(info)
-        self.controller.start()
-        self.sub.create()
+        cls.pubsub = PubSub(None, cls.spark).with_service_account(info)
+        cls.controller.start()
+        cls.sub.create()
 
     message: str | None = None
 
@@ -130,9 +137,10 @@ class PubSubTestCase(unittest.TestCase):
         with self.assertRaisesRegex(AnalysisException, "pubsub is not a valid Spark SQL Data Source."):
             df.printSchema()
 
-    def tearDown(self):
-        tear_down(self.spark, self.controller)
-        self.sub.purge()
+    @classmethod
+    def tearDownClass(cls):
+        cls.spark.stop()
+        cls.sub.purge()
 
 
 if __name__ == '__main__':

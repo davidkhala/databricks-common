@@ -1,22 +1,28 @@
 import unittest
 
 from davidkhala.syntax.fs import write_json
+from pyspark.sql.connect.session import SparkSession
 
 from davidkhala.databricks.connect import DatabricksConnect
 from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.table import Table
 
 w = Workspace.from_local()
+from davidkhala.databricks.lineage.rest import API as RESTAPI
+from notebook.source.azure_open_datasets.nyctlc import NycTLC
+
 
 class LineageTest(unittest.TestCase):
-    def setUp(self):
-        from davidkhala.databricks.lineage.rest import API as RESTAPI
-        self.api = RESTAPI(w.api_client)
-        self.t = Table(w.client)
-        self.spark, _ = DatabricksConnect.get()
-        from notebook.source.azure_open_datasets.nyctlc import NycTLC
+    t: Table
+    api: RESTAPI
+    spark: SparkSession
 
-        instance = NycTLC(self.spark)
+    @classmethod
+    def setUpClass(cls):
+        cls.api = RESTAPI(w.api_client)
+        cls.t = Table(w.client)
+        cls.spark, _ = DatabricksConnect.get()
+        instance = NycTLC(cls.spark)
         instance.load()
         instance.copy_to_current()
 
@@ -31,8 +37,10 @@ class LineageTest(unittest.TestCase):
         for column in columns:
             c_l = self.api.get_column(table_name, column)
             print(c_l)
-    def tearDown(self):
-        self.spark.stop()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.spark.stop()
 
 
 if __name__ == '__main__':

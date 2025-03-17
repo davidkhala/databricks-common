@@ -37,10 +37,3 @@ def to_table(df: DataFrame, table, w: Workspace, spark: SparkSession):
 
 
 mem_table = "streaming_memory_table"
-
-
-def tear_down(spark: SparkSession, cluster: Cluster = None):
-    if os.environ.get("ci") and cluster:
-        cluster.stop()
-    spark.interruptAll()
-    spark.stop()

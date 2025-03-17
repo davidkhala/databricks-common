@@ -1,5 +1,7 @@
 import unittest
+from databricks.sdk import WorkspaceClient
 from davidkhala.databricks.connect import DatabricksConnect
+from davidkhala.databricks.workspace.server import Cluster
 
 
 class ConfigTestCase(unittest.TestCase):
@@ -7,10 +9,12 @@ class ConfigTestCase(unittest.TestCase):
         DatabricksConnect.ping(True)
 
     def test_find_cluster(self):
-        from tests.servermore import get
-        spark, controller = get()
-        controller.start()
-        # print(controller.cluster_id)
+        w = WorkspaceClient()
+        c = Cluster(w)
+        c.as_one()
+        self.assertIsNotNone(c.cluster_id)
+        print(c.cluster_id)
+        c.start()
 
 
 if __name__ == '__main__':

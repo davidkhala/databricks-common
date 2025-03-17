@@ -8,7 +8,7 @@ from davidkhala.databricks.connect import DatabricksConnect
 from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.server import Cluster
 from tests.servermore import get
-from tests.stream import to_table, tear_down
+from tests.stream import to_table
 
 
 class SampleStreamTestCase(unittest.TestCase):
@@ -31,18 +31,18 @@ class SampleStreamTestCase(unittest.TestCase):
         r = self.sample_test(self.spark)
         self.assertEqual(0, r.count())
 
+        self.spark.stop()
+
     def test_sample_on_servermore(self):
         self.servermore()
         r = self.sample_test(self.spark)
         self.assertGreater(r.count(), 0)
+        self.spark.stop()
 
     def sample_test(self, spark):
         df = sample(spark)
         table = 'rate_stream'
         return to_table(df, table, self.w, spark)
-
-    def tearDown(self):
-        tear_down(self.spark, self.controller)
 
 
 if __name__ == '__main__':
