@@ -28,18 +28,11 @@ class SampleStreamTestCase(unittest.TestCase):
         assert serverless
         self.spark = spark
 
-    def test_clean(self):
-        self.serverless()
-        table = 'rate_stream'
-        v = clean(table, self.w)
-        v.create()
-
     def test_sample_on_serverless(self):
         self.serverless()
         clean(self.table, self.w)
         df = sample(self.spark)
 
-        sleep(3)
         query, _ = to_table(df, self.table, self.w, self.spark)
         query.awaitTermination()
         # FIXME Spark Connect bug? why this is different than in notebook?

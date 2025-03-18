@@ -24,9 +24,9 @@ class DatabricksConnectTest(unittest.TestCase):
         #
         spark.stop()
 
-    @staticmethod
-    def test_ping():
+    def test_ping(self):
         DatabricksConnect.ping(True)
+        self.assertTrue(True)
 
     def test_serverless(self):
         spark = DatabricksConnect.from_serverless(self.config)

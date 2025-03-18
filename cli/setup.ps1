@@ -4,7 +4,10 @@ function Install
 {
     winget install --accept-source-agreements Databricks.DatabricksCLI
 }
-
+function Upgrade
+{
+    winget upgrade Databricks.DatabricksCLI
+}
 function Logout
 {
     Remove-Item $env:USERPROFILE/.databrickscfg

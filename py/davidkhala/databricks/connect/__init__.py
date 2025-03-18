@@ -16,12 +16,13 @@ class DatabricksConnect:
 
     @staticmethod
     def get() -> (SparkSession, bool):
-        _builder = DatabricksSession.builder
+        builder = DatabricksSession.builder
         try:
-            return _builder.validateSession(True).getOrCreate(), False
+            spark = builder.validateSession(True).getOrCreate()
+            return spark, Session(spark).serverless
         except Exception as e:
             if str(e) == 'Cluster id or serverless are required but were not specified.':
-                return _builder.serverless(True).getOrCreate(), True
+                return builder.serverless(True).getOrCreate(), True
             else:
                 raise e
 
