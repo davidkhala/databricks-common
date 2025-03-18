@@ -26,11 +26,16 @@ def wait_data(spark, _sql, poll_count=1, interceptor: Callable[[DataFrame, int],
         return r
 
 
-def to_table(df: DataFrame, table, w: Workspace, spark: SparkSession) -> (StreamingQuery, str):
-    t = SinkTable(df, Session(spark).serverless)
+def clean(table, w: Workspace):
     Table(w.client).delete(f"{w.catalog}.default.{table}")
     volume = Volume(w, table)
     volume.delete()
+    return volume
+
+
+def to_table(df: DataFrame, table, w: Workspace, spark: SparkSession) -> (StreamingQuery, str):
+    volume = Volume(w, table)
+    t = SinkTable(df, Session(spark).serverless)
     t.with_trigger()
     query = t.persist(table, volume)
 

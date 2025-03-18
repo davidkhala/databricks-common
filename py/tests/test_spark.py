@@ -3,19 +3,20 @@ from typing import Optional
 
 from davidkhala.spark.source.stream import sample
 from pyspark.sql.connect.session import SparkSession
-from pyspark.sql.connect.streaming.query import StreamingQuery
 
-from davidkhala.databricks.connect import DatabricksConnect
+from davidkhala.databricks.connect import DatabricksConnect, Session
 from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.server import Cluster
+from davidkhala.databricks.workspace.volume import Volume
 from tests.servermore import get
-from tests.stream import to_table, wait_data
+from tests.stream import to_table, wait_data, clean, mem_table
 
 
 class SampleStreamTestCase(unittest.TestCase):
     w = Workspace.from_local()
     controller: Optional[Cluster] = None
     spark: SparkSession
+    table = 'rate_stream'
 
     def servermore(self):
         self.spark, self.controller = get(self.w)
@@ -26,28 +27,35 @@ class SampleStreamTestCase(unittest.TestCase):
         assert serverless
         self.spark = spark
 
+    def test_clean(self):
+        self.serverless()
+        table = 'rate_stream'
+        v = clean(table, self.w)
+        v.create()
+
     def test_sample_on_serverless(self):
         self.serverless()
+        clean(self.table, self.w)
+        df = sample(self.spark)
+        query, _ = to_table(df, self.table, self.w, self.spark)
+        query.awaitTermination()
+        # FIXME Spark Connect bug? why this is different than in notebook?
+        _, _sql = to_table(df, self.table, self.w, self.spark)
 
-        query, _sql = self.sample_test(self.spark)
-        query.awaitTermination() # It will be stopped automatically
-        r = self.spark.sql(_sql)
-        self.assertEqual(0, r.count())
+        wait_data(self.spark, _sql)
+
         if not self.spark.is_stopped:
             self.spark.stop()
 
     def test_sample_on_servermore(self):
         self.servermore()
-        _, _sql = self.sample_test(self.spark)
+        clean(self.table, self.w)
+        df = sample(self.spark)
+        _, _sql = to_table(df, self.table, self.w, self.spark)
 
         wait_data(self.spark, _sql)
 
         self.spark.stop()
-
-    def sample_test(self, spark)->(StreamingQuery, str):
-        df = sample(spark)
-        table = 'rate_stream'
-        return to_table(df, table, self.w, spark)
 
 
 if __name__ == '__main__':
