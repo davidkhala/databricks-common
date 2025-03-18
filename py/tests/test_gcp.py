@@ -16,7 +16,7 @@ from davidkhala.databricks.gcp.pubsub import PubSub
 from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.server import Cluster
 from tests.servermore import get
-from tests.stream import to_table, wait_data, mem_table
+from tests.stream import to_table, wait_data, mem_table, clean
 
 private_key = os.environ.get('PRIVATE_KEY')
 info = ServiceAccount.Info(
@@ -60,11 +60,13 @@ class PubSubTestCase(unittest.TestCase):
         df = PubSubTestCase.pubsub.read_stream(PubSubTestCase.topic_id, PubSubTestCase.subscription_id).read_start()
 
         table = 'pubsub'
+        clean(table, self.w)
         query, _sql = to_table(df, table, PubSubTestCase.w, PubSubTestCase.spark)
 
         r = wait_data(PubSubTestCase.spark, _sql, 1, lambda *_: self.on_ready(query))
 
         self.assertGreaterEqual(r.count(), 1)
+
         self.assertEqual(self.message, cast(bytearray, r.first()['payload']).decode('utf-8'))
 
     def on_ready(self, query):
@@ -85,7 +87,8 @@ class PubSubTestCase(unittest.TestCase):
         # self.sink_memory(True, True) # Poll until 60 seconds timeout. No data available
 
     def sink_memory(self, random_sub, with_trigger):
-
+        if not random_sub:
+            PubSubTestCase.sub.purge()
         if with_trigger:
             self.publish()
         PubSubTestCase.pubsub.read_stream(PubSubTestCase.topic_id,
@@ -113,8 +116,6 @@ class PubSubTestCase(unittest.TestCase):
         query.stop()
         PubSubTestCase.spark.sql(f"DROP TABLE {mem_table}")
         self.message = None
-        if not random_sub:
-            PubSubTestCase.sub.purge()
 
     def test_read_batch(self):
 

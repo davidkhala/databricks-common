@@ -55,6 +55,6 @@ class Warehouse(ClientWare):
     @staticmethod
     def pretty(r: StatementResponse):
         return {
-            'schema': r.manifest.schema.columns,
+            'schema': r.manifest.schema.as_dict().get('columns'),
             'data': r.result.data_array,
         }
