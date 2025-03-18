@@ -4,12 +4,11 @@ from typing import Optional
 from davidkhala.spark.source.stream import sample
 from pyspark.sql.connect.session import SparkSession
 
-from davidkhala.databricks.connect import DatabricksConnect, Session
+from davidkhala.databricks.connect import DatabricksConnect
 from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.server import Cluster
-from davidkhala.databricks.workspace.volume import Volume
 from tests.servermore import get
-from tests.stream import to_table, wait_data, clean, mem_table
+from tests.stream import to_table, wait_data, clean
 
 
 class SampleStreamTestCase(unittest.TestCase):

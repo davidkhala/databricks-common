@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
   schedule:
-  - cron: '0 10 * * 1'  
+    - cron: '0 10 * * 1'
 
 jobs:
   self-reference:
@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@main
       - run: ./cli/setup.sh install
-      - run: ./cli/setup.sh login-serverless ${{ vars.WORKSPACE }} ${{secrets.PAT}}
+      - run: ./cli/setup.sh login-serverless ${{ vars.WORKSPACE }} ${{ secrets.PAT }}
       - uses: davidkhala/poetry-buildpack@main
         with:
           working-directory: py/tests/self
@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@main
       - run: ./cli/setup.sh install
-      - run: ./cli/setup.sh login-serverless ${{ vars.WORKSPACE }} ${{secrets.PAT}}
+      - run: ./cli/setup.sh login-serverless ${{ vars.WORKSPACE }} ${{ secrets.PAT }}
       - uses: davidkhala/poetry-buildpack@main
         with:
           working-directory: py

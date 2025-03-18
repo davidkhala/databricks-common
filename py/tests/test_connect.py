@@ -11,9 +11,9 @@ class DatabricksConnectTest(unittest.TestCase):
     columns = ["id", "name", "age"]
     w = Workspace.from_local()
     config = w.config
-
-    def setUp(self):
-        print(self.config)
+    @classmethod
+    def setUpClass(cls):
+        print(cls.config)
         from davidkhala.databricks.local import CONFIG_PATH
         print(CONFIG_PATH)
 

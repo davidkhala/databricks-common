@@ -95,5 +95,5 @@ class NycTLC(SparkWare):
             blob_df = self.spark.read.parquet(wasbs_path)
 
             full_name = f"{catalog}.{schema}.{blob_relative_path}"
-            Table(self.wc).delete(full_name)
+            Table(self.w.client).delete(full_name)
             blob_df.write.saveAsTable(full_name)

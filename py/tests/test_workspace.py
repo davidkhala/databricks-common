@@ -6,6 +6,7 @@ from davidkhala.syntax.fs import write_json
 from davidkhala.databricks.workspace import Workspace, path
 from davidkhala.databricks.workspace.catalog import Catalog, Schema
 from davidkhala.databricks.workspace.job import Job
+from davidkhala.databricks.workspace.server import Cluster
 from davidkhala.databricks.workspace.warehouse import Warehouse
 
 w = Workspace.from_local()
@@ -13,7 +14,8 @@ w = Workspace.from_local()
 
 class WorkspaceTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         print(w.config_token)
 
     def test_notebook(self):
@@ -26,14 +28,15 @@ class WorkspaceTest(unittest.TestCase):
         self.assertEqual(s.get_by(notebook_id=notebook_id), '/Shared/context')
 
     def test_clusters(self):
-        clusters = w.clusters()
-        self.assertGreaterEqual(len(clusters), 0)
+        c = Cluster(w.client)
+        self.assertGreaterEqual(len(list(c.clusters())), 0)
+
+
+from davidkhala.databricks.workspace.table import Table
 
 
 class TableTest(unittest.TestCase):
-    def setUp(self):
-        from davidkhala.databricks.workspace.table import Table
-        self.t = Table(w.client)
+    t = Table(w.client)
 
     def test_table_get(self):
         table_name = "samples.nyctaxi.trips"
@@ -41,11 +44,12 @@ class TableTest(unittest.TestCase):
         write_json(r, table_name)
 
 
+from davidkhala.databricks.workspace.volume import Volume
+
+
 class VolumeTest(unittest.TestCase):
-    def setUp(self):
-        from davidkhala.databricks.workspace.volume import Volume
-        self.v = Volume(w, 'new')
-        self.fs = self.v.fs
+    v = Volume(w, 'new')
+    fs = v.fs
 
     def test_volume_get(self):
         print(self.v.get())
@@ -71,15 +75,18 @@ class VolumeFSTest(unittest.TestCase):
     def test_fs_upload(self):
         self.fs.upload('self/pyproject.toml')
         print(self.fs.read('pyproject.toml'))
+
     @classmethod
     def tearDownClass(cls):
         cls.v.delete()
 
 
 class WarehouseTest(unittest.TestCase):
-    def setUp(self):
-        self.w = Warehouse(w.client)
-        self.w.get_one()
+    w = Warehouse(w.client)
+
+    @classmethod
+    def setUpClass(cls):
+        cls.w.get_one()
 
     def test_list(self):
         for warehouse in self.w.ls():
@@ -108,9 +115,8 @@ class WarehouseTest(unittest.TestCase):
 
 
 class CatalogTest(unittest.TestCase):
-    def setUp(self):
-        self.c = Catalog(w.client)
-        self.s = Schema(w.client, 'test')
+    c = Catalog(w.client)
+    s = Schema(w.client, 'test')
 
     def test_get(self):
         _ = self.c.get('not_exists')
