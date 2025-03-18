@@ -93,7 +93,7 @@ class WarehouseTest(unittest.TestCase):
             print(warehouse.id)
 
     def test_active(self):
-        self.w.activate()
+        self.w.start()
 
     def test_stop(self):
         self.w.stop()
@@ -111,7 +111,7 @@ class WarehouseTest(unittest.TestCase):
             where source_table_full_name is not null
               and target_table_full_name is not null        
             """)
-        write_json(r, 'table-lineage')
+        write_json(Warehouse.pretty(r), 'table-lineage')
 
 
 class CatalogTest(unittest.TestCase):

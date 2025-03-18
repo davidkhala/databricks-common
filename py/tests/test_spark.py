@@ -1,4 +1,5 @@
 import unittest
+from time import sleep
 from typing import Optional
 
 from davidkhala.spark.source.stream import sample
@@ -7,8 +8,9 @@ from pyspark.sql.connect.session import SparkSession
 from davidkhala.databricks.connect import DatabricksConnect
 from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.server import Cluster
+from davidkhala.databricks.workspace.warehouse import Warehouse
 from tests.servermore import get
-from tests.stream import to_table, wait_data, clean
+from tests.stream import to_table, wait_data, clean, wait_warehouse_data
 
 
 class SampleStreamTestCase(unittest.TestCase):
@@ -36,12 +38,16 @@ class SampleStreamTestCase(unittest.TestCase):
         self.serverless()
         clean(self.table, self.w)
         df = sample(self.spark)
+
+        sleep(3)
         query, _ = to_table(df, self.table, self.w, self.spark)
         query.awaitTermination()
         # FIXME Spark Connect bug? why this is different than in notebook?
         _, _sql = to_table(df, self.table, self.w, self.spark)
 
-        wait_data(self.spark, _sql)
+        warehouse = Warehouse(self.w.client).get_one()
+        warehouse.start()
+        wait_warehouse_data(warehouse, _sql)
 
         if not self.spark.is_stopped:
             self.spark.stop()
