@@ -3,6 +3,7 @@ from typing import Callable, Any
 
 from pyspark.sql.connect.dataframe import DataFrame
 from pyspark.sql.connect.session import SparkSession
+from pyspark.sql.connect.streaming.query import StreamingQuery
 
 from davidkhala.databricks.connect import Session
 from davidkhala.databricks.sink.stream import Table as SinkTable
@@ -25,11 +26,12 @@ def wait_data(spark, _sql, poll_count=1, interceptor: Callable[[DataFrame, int],
         return r
 
 
-def to_table(df: DataFrame, table, w: Workspace, spark: SparkSession):
+def to_table(df: DataFrame, table, w: Workspace, spark: SparkSession) -> (StreamingQuery, str):
     t = SinkTable(df, Session(spark).serverless)
     Table(w.client).delete(f"{w.catalog}.default.{table}")
     volume = Volume(w, table)
     volume.delete()
+    t.with_trigger()
     query = t.persist(table, volume)
 
     return query, f"select * from {table}"

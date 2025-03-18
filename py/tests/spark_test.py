@@ -3,12 +3,13 @@ from typing import Optional
 
 from davidkhala.spark.source.stream import sample
 from pyspark.sql.connect.session import SparkSession
+from pyspark.sql.connect.streaming.query import StreamingQuery
 
 from davidkhala.databricks.connect import DatabricksConnect
 from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.server import Cluster
 from tests.servermore import get
-from tests.stream import to_table
+from tests.stream import to_table, wait_data
 
 
 class SampleStreamTestCase(unittest.TestCase):
@@ -28,18 +29,22 @@ class SampleStreamTestCase(unittest.TestCase):
     def test_sample_on_serverless(self):
         self.serverless()
 
-        r = self.sample_test(self.spark)
+        query, _sql = self.sample_test(self.spark)
+        query.awaitTermination() # It will be stopped automatically
+        r = self.spark.sql(_sql)
         self.assertEqual(0, r.count())
-
-        self.spark.stop()
+        if not self.spark.is_stopped:
+            self.spark.stop()
 
     def test_sample_on_servermore(self):
         self.servermore()
-        r = self.sample_test(self.spark)
-        self.assertGreater(r.count(), 0)
+        _, _sql = self.sample_test(self.spark)
+
+        wait_data(self.spark, _sql)
+
         self.spark.stop()
 
-    def sample_test(self, spark):
+    def sample_test(self, spark)->(StreamingQuery, str):
         df = sample(spark)
         table = 'rate_stream'
         return to_table(df, table, self.w, spark)

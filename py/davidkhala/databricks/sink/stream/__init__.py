@@ -22,7 +22,7 @@ class Write:
         if self.serverless:
             self.stream = self.stream.trigger(availableNow=True)
         else:
-            if option is None:
+            if not option:
                 option = {
                     'processingTime': '0 seconds'
                 }
