@@ -4,6 +4,7 @@ from typing import Optional
 
 from davidkhala.spark.source.stream import sample
 from pyspark.sql.connect.session import SparkSession
+from pyspark.sql.connect.streaming.query import StreamingQuery
 
 from davidkhala.databricks.connect import DatabricksConnect
 from davidkhala.databricks.workspace import Workspace
@@ -33,10 +34,13 @@ class SampleStreamTestCase(unittest.TestCase):
         clean(self.table, self.w)
         df = sample(self.spark)
 
+        query: StreamingQuery
         query, _ = to_table(df, self.table, self.w, self.spark)
         query.awaitTermination()
+
         # FIXME Spark Connect bug? why this is different than in notebook?
-        _, _sql = to_table(df, self.table, self.w, self.spark)
+        query, _sql = to_table(df, self.table, self.w, self.spark)
+        query.awaitTermination()
 
         warehouse = Warehouse(self.w.client).get_one()
         warehouse.start()

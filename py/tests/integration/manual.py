@@ -10,7 +10,7 @@ from davidkhala.databricks.workspace.table import Table
 w = Workspace.from_local()
 from davidkhala.databricks.lineage.rest import API as RESTAPI
 from notebook.source.azure_open_datasets.nyctlc import NycTLC
-
+from notebook.source.azure_open_datasets.context import catalog
 
 class LineageTest(unittest.TestCase):
     t: Table
@@ -22,12 +22,12 @@ class LineageTest(unittest.TestCase):
         cls.api = RESTAPI(w.api_client)
         cls.t = Table(w.client)
         cls.spark, _ = DatabricksConnect.get()
-        instance = NycTLC(cls.spark)
-        instance.load()
-        instance.copy_to_current()
+
 
     def test_API_lineage(self):
-        from notebook.source.azure_open_datasets.context import catalog
+        instance = NycTLC(LineageTest.spark)
+        instance.load()
+        instance.copy_to_current()
         table_name = f"{catalog}.nyctlc.yellow"
         table_lineage = self.api.get_table(table_name)
 

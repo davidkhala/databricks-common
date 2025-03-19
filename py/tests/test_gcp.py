@@ -44,9 +44,8 @@ class PubSubTestCase(unittest.TestCase):
         OptionsInterface.token.fget(auth)
 
         cls.spark, cls.controller = get(cls.w)
-
-        cls.pubsub = PubSub(None, cls.spark).with_service_account(info)
         cls.controller.start()
+        cls.pubsub = PubSub(None, cls.spark).with_service_account(info)
         cls.sub.create()
 
     message: str | None = None
