@@ -1,5 +1,4 @@
 import unittest
-from time import sleep
 from typing import Optional
 
 from davidkhala.spark.source.stream import sample

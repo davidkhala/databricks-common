@@ -1,16 +1,15 @@
 import unittest
 
 from databricks.sdk import WorkspaceClient
-from databricks.sdk.service.compute import PythonPyPiLibrary
 
-from davidkhala.databricks.workspace.server import Cluster, Library
+from davidkhala.databricks.workspace.server import Library
 
 
 class LibraryTestCase(unittest.TestCase):
     def test_library_add(self):
         client = WorkspaceClient()
-        Cluster(client).as_one().pollute()
         library = Library(client)
+        library.cluster.as_one().pollute()
         package_name = 'davidkhala-devops[new-relic]'
         library.add(package_name)
         library.uninstall_a(package_name)

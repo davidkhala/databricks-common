@@ -19,3 +19,9 @@ It is not recommended
 pip install databricks-connect --break-system-packages
 databricks-connect test
 ```
+
+# Difference between Spark Connect
+python module paths
+- "StreamingQuery"
+  - in Spark Connect: `from pyspark.sql.connect.streaming import StreamingQuery`
+  - in Databricks Connect: `from pyspark.sql.connect.streaming.query import StreamingQuery`

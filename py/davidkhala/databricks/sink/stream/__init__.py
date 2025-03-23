@@ -1,7 +1,7 @@
 from typing import Callable, Any
 
 from databricks.sdk import WorkspaceClient
-from pyspark.sql import DataFrame
+from pyspark.sql.connect.dataframe import DataFrame
 from pyspark.sql.connect.streaming.query import StreamingQuery
 from pyspark.sql.streaming import DataStreamWriter
 

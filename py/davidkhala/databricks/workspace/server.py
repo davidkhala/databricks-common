@@ -13,11 +13,13 @@ class ClusterWare(ClientWare):
         super().__init__(client)
         self.cluster_id = client.config.cluster_id
 
+
+class Cluster(ClusterWare):
     def start(self):
         self.client.clusters.ensure_cluster_is_running(self.cluster_id)
 
-
-class Cluster(ClusterWare):
+    def stop(self):
+        self.client.clusters.delete_and_wait(self.cluster_id)
 
     def clusters(self) -> Iterator[ClusterDetails]:
         return self.client.clusters.list()
@@ -34,20 +36,21 @@ class Cluster(ClusterWare):
     def pollute(self):
         self.client.config.cluster_id = self.cluster_id
 
-    def stop(self):
-        self.client.clusters.delete_and_wait(self.cluster_id)
-
 
 class Library(ClusterWare):
     @staticmethod
     def from_pypi(*packages: PythonPyPiLibrary) -> List[NativeLibrary]:
         return list(map(lambda package: NativeLibrary(pypi=package), packages))
 
+    @property
+    def cluster(self):
+        return Cluster(self.client)
+
     def add_async(self, *packages: PythonPyPiLibrary):
         self.client.libraries.install(self.cluster_id, Library.from_pypi(*packages))
 
     def add(self, package_name: str):
-        self.start()
+        self.cluster.start()
         package = PythonPyPiLibrary(package=package_name)
         self.add_async(package)
         status = None
