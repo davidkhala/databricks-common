@@ -52,8 +52,8 @@ class Session(ServerMore):
         return (
                 self.clusterId is None
                 and self.conf.get('spark.sql.ansi.enabled') == 'true'
-                and self.conf.get('spark.sql.shuffle.partitions', ) == 'auto'
-                and self.conf.__len__() == 2
+                and self.conf.get('spark.sql.shuffle.partitions') == 'auto'
+                and self.conf.__len__() < 4
         )
 
     @property

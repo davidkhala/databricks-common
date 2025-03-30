@@ -2,6 +2,7 @@ import unittest
 from typing import Optional
 
 from davidkhala.spark.source.stream import sample
+from pyspark.sql.connect.dataframe import DataFrame
 from pyspark.sql.connect.session import SparkSession
 from pyspark.sql.connect.streaming.query import StreamingQuery
 
@@ -44,6 +45,18 @@ class SampleStreamTestCase(unittest.TestCase):
         warehouse = Warehouse(self.w.client).get_one()
         warehouse.start()
         wait_warehouse_data(warehouse, _sql)
+
+        if not self.spark.is_stopped:
+            self.spark.stop()
+
+    def test_sample_on_serverless2(self):
+        self.serverless()
+        df: DataFrame = sample(self.spark)
+        def on_each(row):
+            raise Exception("should not be reached")
+
+        query = df.writeStream.foreach(on_each).trigger(availableNow=True).start()
+        query.awaitTermination()
 
         if not self.spark.is_stopped:
             self.spark.stop()
