@@ -43,9 +43,10 @@ class Library(ClusterWare):
         return list(map(lambda package: NativeLibrary(pypi=package), packages))
 
     @property
-    def cluster(self):
-        return Cluster(self.client)
-
+    def cluster(self)->Cluster:
+        return Cluster(self.client).as_one()
+    def pollute(self):
+        self.cluster_id = self.cluster.cluster_id
     def add_async(self, *packages: PythonPyPiLibrary):
         self.client.libraries.install(self.cluster_id, Library.from_pypi(*packages))
 

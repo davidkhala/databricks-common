@@ -9,7 +9,7 @@ class LibraryTestCase(unittest.TestCase):
     def test_library_add(self):
         client = WorkspaceClient()
         library = Library(client)
-        library.cluster.as_one().pollute()
+        library.pollute()
         package_name = 'davidkhala-devops[new-relic]'
         library.add(package_name)
         library.uninstall_a(package_name)
