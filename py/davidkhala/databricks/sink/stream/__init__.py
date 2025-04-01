@@ -1,22 +1,18 @@
 from typing import Callable, Any
 
 from databricks.sdk import WorkspaceClient
+from davidkhala.spark.sink.stream import Write as SparkStreamWrite
 from pyspark.sql.connect.dataframe import DataFrame
 from pyspark.sql.connect.streaming.query import StreamingQuery
-from pyspark.sql.streaming import DataStreamWriter
+from pyspark.sql.connect.streaming.readwriter import DataStreamWriter
 
 from davidkhala.databricks.workspace.volume import Volume
 
 
-class Write:
-    stream: DataStreamWriter
-    serverless: bool
-    onStart: Callable[["Write", DataStreamWriter], Any] = None
-
+class Write(SparkStreamWrite):
     def __init__(self, df: DataFrame, serverless=False):
-        assert df.isStreaming
-        self.stream = df.writeStream
-        self.serverless = serverless
+        super().__init__(df)
+        self.serverless: bool = serverless
 
     def with_trigger(self, **option):
         if self.serverless:
@@ -31,6 +27,7 @@ class Write:
 
 
 class Table(Write):
+    onStart: Callable[["Write", DataStreamWriter], Any] = None
 
     def persist(self, table_name: str, volume: Volume = None, *, client: WorkspaceClient = None) -> StreamingQuery:
         if volume is None:

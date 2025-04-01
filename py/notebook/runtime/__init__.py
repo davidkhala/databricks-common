@@ -1,9 +1,8 @@
-from platform import python_version
-
-python_version = python_version()
-
 # Databricks context
 from databricks.sdk.runtime import dbutils, spark
+import platform
+
+python_version = platform.python_version()
 
 ## workspace context
 Context = dbutils.notebook.entry_point.getDbutils().notebook().getContext()

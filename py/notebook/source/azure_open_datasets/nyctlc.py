@@ -6,19 +6,19 @@ from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.catalog import Catalog, Schema
 from davidkhala.databricks.workspace.table import Table
 from davidkhala.databricks.workspace.volume import Volume
-from notebook.connect import SparkWare
 from notebook.source.azure_open_datasets import context
 
 schema = 'nyctlc'
 
 
-class NycTLC(SparkWare):
+class NycTLC:
     w = Workspace()
     t = Table(w.client)
     overwrite: bool = True
 
-    def __init__(self, spark_instance=None):
-        super().__init__(spark_instance)
+    def __init__(self):
+        from databricks.sdk.runtime import spark
+        self.spark = spark
         self.schema = schema
         self.catalog = context.catalog
 
