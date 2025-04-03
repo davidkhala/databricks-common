@@ -1,5 +1,6 @@
 import pathlib
 import warnings
+from http.client import responses
 
 from davidkhala.databricks import is_databricks_notebook
 from davidkhala.databricks.workspace import Workspace
@@ -16,14 +17,15 @@ class NycTLC:
     t = Table(w.client)
     overwrite: bool = True
 
-    def __init__(self):
-        from databricks.sdk.runtime import spark
+    def __init__(self, spark=None):
+        if not spark:
+            from databricks.sdk.runtime import spark
         self.spark = spark
         self.schema = schema
         self.catalog = context.catalog
 
         Catalog(self.w.client).create(self.catalog)
-        Schema(self.w.client,schema).create()
+        Schema(self.w.client, schema).create()
 
     def copy_to_current(self):
         self.spark.sql(f"CREATE SCHEMA IF NOT EXISTS {self.schema}")
@@ -58,17 +60,21 @@ class NycTLC:
             basename = f"{table}_tripdata_{year}-{month}.parquet"
             parquet_file_url = f"https://d37ci6vzurychx.cloudfront.net/trip-data/{basename}"
 
-            from urllib.request import urlretrieve
+            from requests import get
             parquet_file_path = f"{v.path}/{basename}"
             if is_databricks_notebook():
                 if not pathlib.Path(parquet_file_path).exists():
-                    urlretrieve(parquet_file_url, parquet_file_path)
+                    with open(parquet_file_path, 'wb') as f:
+                        response = get(parquet_file_url)
+                        f.write(response.content)
             else:
                 # FIXME: databricks\sdk\retries.py", line 59, in wrapper
                 ## raise TimeoutError(f'Timed out after {timeout}') from last_err
 
                 if not v.fs.exists(basename):
-                    urlretrieve(parquet_file_url, basename)
+                    with open(basename, 'wb') as f:
+                        response = get(parquet_file_url)
+                        f.write(response.content)
                     v.fs.upload(basename)
 
             df = self.spark.read.parquet(parquet_file_path)
