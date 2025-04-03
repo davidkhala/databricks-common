@@ -1,18 +1,23 @@
 from typing import Callable, Any
 
 from databricks.sdk import WorkspaceClient
-from davidkhala.spark.sink.stream import Write as SparkStreamWrite
 from pyspark.sql.connect.dataframe import DataFrame
+from pyspark.sql.connect.session import SparkSession
 from pyspark.sql.connect.streaming.query import StreamingQuery
 from pyspark.sql.connect.streaming.readwriter import DataStreamWriter
 
 from davidkhala.databricks.workspace.volume import Volume
 
 
-class Write(SparkStreamWrite):
+class Write:
     def __init__(self, df: DataFrame, serverless=False):
-        super().__init__(df)
+        assert df.isStreaming
+        self.stream: DataStreamWriter = df.writeStream
         self.serverless: bool = serverless
+
+    @property
+    def spark(self) -> SparkSession:
+        return self.stream._session
 
     def with_trigger(self, **option):
         if self.serverless:

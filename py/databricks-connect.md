@@ -22,6 +22,8 @@ databricks-connect test
 
 # Difference between Spark Connect
 python module paths
-- "StreamingQuery"
-  - in Spark Connect: `from pyspark.sql.connect.streaming import StreamingQuery`
-  - in Databricks Connect: `from pyspark.sql.connect.streaming.query import StreamingQuery`
+
+| class | import from Spark Connect | import from Databricks Connect|
+| ---- | ---- | ---- |
+| `StreamingQuery` | `from pyspark.sql.connect.streaming import StreamingQuery` | `from pyspark.sql.connect.streaming.query import StreamingQuery` |
+| `DataStreamWriter` | `from pyspark.sql.connect.streaming import DataStreamWriter` | `from pyspark.sql.connect.streaming.readwriter import DataStreamWriter`|
