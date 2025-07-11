@@ -8,17 +8,18 @@ on:
 
 jobs:
   self-reference:
+    environment: david-khala@hotmail.com
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@main
       - run: ./cli/setup.sh install
       - run: ./cli/setup.sh login-serverless ${{ vars.WORKSPACE }} ${{ secrets.PAT }}
-      - uses: davidkhala/poetry-buildpack@main
+      - uses: davidkhala/uv-buildpack@main
         with:
           working-directory: py/tests/self
           test-entry-point: python test.py
           tests: py/tests/self
-      - run: poetry run databricks-connect test
+      - run: uv run databricks-connect test
         working-directory: py/tests/self
   tests:
     runs-on: ubuntu-latest
@@ -27,7 +28,7 @@ jobs:
       - uses: actions/checkout@main
       - run: ./cli/setup.sh install
       - run: ./cli/setup.sh login-serverless ${{ vars.WORKSPACE }} ${{ secrets.PAT }}
-      - uses: davidkhala/poetry-buildpack@main
+      - uses: davidkhala/uv-buildpack@main
         with:
           working-directory: py
           test-entry-point: test
