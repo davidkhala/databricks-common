@@ -6,6 +6,8 @@ requires
 - `SELECT` privilieges on Unity Catalog data objects.
 
 ## (Genie) Knowledge store: the knowledge base
+>
+> Genie automatically stores example values and creates value dictionaries for eligible columns as you add tables to the space.
 
 - Edit metadata:
   - in **Configure** > **Data**.
@@ -31,3 +33,10 @@ requires
 
 - **verified answers to questions**: Example SQL Queries with parameters and SQL Functions that you add to a space's context (**Configure** > **Context** > **SQL Queries**) are treated as trusted assets.
 - When a user submits a question that invokes a trusted asset, it's indicated in the response as a badge <img width="70" height="29" alt="image" src="https://github.com/user-attachments/assets/fa2dd2e7-08eb-4518-8409-824691f2eed8" />
+
+## Benchmark
+
+set test questions that you can run to assess Genie's overall response accuracy
+
+- Each question is processed as a new query
+  - They do not carry the same context as a threaded Genie conversation
