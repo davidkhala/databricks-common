@@ -1,33 +1,38 @@
-[tool.poetry]
+[project]
 name = "davidkhala.databricks"
 version = "0.1.3"
 description = ""
-authors = ["David Liu <david-khala@hotmail.com>"]
-license = "MIT"
+authors = [{ name = "David Liu", email = "david-khala@hotmail.com" }]
+requires-python = "~=3.12"
 readme = "README.md"
-packages = [{ include = "davidkhala" }]
+license = "MIT"
+dependencies = [
+    "databricks-sdk",
+    "davidkhala-utils",
+]
 
+[project.optional-dependencies]
+connect = [
+    "databricks-connect>=15",
+    "davidkhala-spark",
+]
+gcp = [
+    "davidkhala-gcp",
+    "davidkhala-gcp-pubsub",
+]
 
-[tool.poetry.dependencies]
-python = "^3.12"
-databricks-sdk = "*"
-davidkhala-utils = "*"
-# for extras
-databricks-connect = { version = "^15", optional = true }
-davidkhala-spark = { version = "*", optional = true }
-davidkhala-gcp = { version = "*", optional = true }
-davidkhala-gcp-pubsub = { version = "*", optional = true }
-
-[tool.poetry.group.dev.dependencies]
-pytest = "*"
-
-[tool.poetry.scripts]
+[project.scripts]
 test = "pytest:main"
 
-[tool.poetry.extras]
-connect = ["databricks-connect", "davidkhala-spark"]
-gcp = ['davidkhala-gcp', 'davidkhala-gcp-pubsub']
+[dependency-groups]
+dev = ["pytest"]
+
+[tool.hatch.build.targets.sdist]
+include = ["davidkhala"]
+
+[tool.hatch.build.targets.wheel]
+include = ["davidkhala"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"

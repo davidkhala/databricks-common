@@ -3,22 +3,21 @@ name: Python
 on:
   workflow_dispatch:
   push:
-  schedule:
-    - cron: '0 10 * * 1'
 
 jobs:
   self-reference:
-    environment: david-khala@hotmail.com
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@main
       - run: ./cli/setup.sh install
       - run: ./cli/setup.sh login-serverless ${{ vars.WORKSPACE }} ${{ secrets.PAT }}
-      - uses: davidkhala/uv-buildpack@main
+      - uses: astral-sh/setup-uv@main
         with:
-          working-directory: py/tests/self
-          test-entry-point: python test.py
-          tests: py/tests/self
+          version: "latest"
+      - run: uv sync --all-extras
+        working-directory: py/tests/self
+      - run: uv run python test.py
+        working-directory: py/tests/self
       - run: uv run databricks-connect test
         working-directory: py/tests/self
   tests:
