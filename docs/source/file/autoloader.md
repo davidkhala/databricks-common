@@ -16,6 +16,7 @@ FROM STREAM read_files(
     '<dir_path>',
 )
 ```
+- 当前 SQL Streaming Table 不支持 trigger=availableNow。所以只能SCHEDULE
 
 ## [schema inference and evolution](https://docs.databricks.com/aws/en/ingestion/cloud-object-storage/auto-loader/schema)
 
