@@ -20,7 +20,7 @@ class Catalog(ClientWare):
     def create(self, name, *, with_metastore_level_storage=False, storage_root=None):
 
         if self.get(name):
-            return
+            return None
 
         if with_metastore_level_storage:
             return self.catalogs.create(name)
@@ -74,7 +74,7 @@ class Schema:
             return self.schemas.create(self.name, self.catalog)
         except platform.BadRequest as e:
             if str(e) == f"Schema '{self.name}' already exists":
-                return
+                return None
             raise e
 
     def delete(self):

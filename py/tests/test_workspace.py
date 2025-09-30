@@ -18,6 +18,8 @@ class WorkspaceTest(unittest.TestCase):
     def setUpClass(cls):
         print(w.config_token)
 
+    def test_default_catalog(self):
+        self.assertEqual(w.catalog, os.environ.get("CATALOG") or "az_databricks")
     def test_notebook(self):
         s = path.SDK.from_workspace(w)
         local_notebook_path = os.path.join(os.path.dirname(__file__), "../notebook/context.ipynb")

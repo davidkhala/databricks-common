@@ -1,4 +1,6 @@
+import os
 import pathlib
+from typing import Union
 
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.config import Config
@@ -38,13 +40,17 @@ class Workspace:
         return self.client.current_user.me()
 
     @property
-    def catalog(self) -> str:
+    def catalog(self) -> Union[str, None]:
         """
-        :return: default catalog name
+        :return: default catalog name. If default catalog does not exist, return None
         """
         from davidkhala.databricks.workspace.catalog import Catalog
 
-        return Catalog(self.client).default
+        c= Catalog(self.client)
+        if c.get(c.default):
+            return c.default
+        else:
+            return None
 
     @property
     def cloud(self):
