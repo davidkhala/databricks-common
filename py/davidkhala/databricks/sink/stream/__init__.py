@@ -21,6 +21,8 @@ class Write:
 
     def with_trigger(self, **option):
         if self.serverless:
+            # [INFINITE_STREAMING_TRIGGER_NOT_SUPPORTED] Trigger type ProcessingTime is not supported for this cluster type.
+            # Use a different trigger type e.g. AvailableNow, Once. SQLSTATE: 0A000
             self.stream = self.stream.trigger(availableNow=True)
         else:
             if not option:
