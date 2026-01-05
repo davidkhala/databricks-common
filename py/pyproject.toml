@@ -13,7 +13,7 @@ dependencies = [
 
 [project.optional-dependencies]
 connect = [
-    "databricks-connect<18", # Databricks Connect 17.2.1 is unsupported with serverless
+    "databricks-connect<18",
     "davidkhala-spark",
 ]
 gcp = [
