@@ -2,7 +2,7 @@ import json
 
 from databricks.sdk.errors import NotFound
 from databricks.sdk.service.catalog import TableInfo
-from davidkhala.syntax.js import Array
+from davidkhala.utils.syntax.js import Array
 
 from davidkhala.databricks.workspace.types import ClientWare
 

@@ -1,6 +1,6 @@
 import os
 
-from davidkhala.syntax.fs import read
+from davidkhala.utils.syntax.fs import read
 
 from davidkhala.databricks.workspace.warehouse import Warehouse
 

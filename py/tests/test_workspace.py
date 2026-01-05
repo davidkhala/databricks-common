@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from davidkhala.syntax.fs import write_json
+from davidkhala.utils.syntax.fs import write_json
 
 from davidkhala.databricks.workspace import Workspace, path
 from davidkhala.databricks.workspace.catalog import Catalog, Schema

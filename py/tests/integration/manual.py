@@ -1,6 +1,6 @@
 import unittest
 
-from davidkhala.syntax.fs import write_json
+from davidkhala.utils.syntax.fs import write_json
 from pyspark.sql.connect.session import SparkSession
 
 from davidkhala.databricks.connect import DatabricksConnect

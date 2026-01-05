@@ -1,6 +1,6 @@
 import pathlib
 
-from davidkhala.syntax.path import home_resolve
+from davidkhala.utils.syntax.path import home_resolve
 
 CONFIG_PATH = home_resolve('.databrickscfg')
 
