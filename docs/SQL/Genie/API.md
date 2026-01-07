@@ -9,7 +9,7 @@
 - **Start a new conversation for each session**
   - Avoid reusing conversation threads across sessions, as this can reduce accuracy due to unintended context reuse
 - **Maintain conversation limits**
-  - Use the [Delete conversation endpoint] to programatically delete conversations when a space approaches the 10,000 conversation limit
+  - Use the [Delete conversation endpoint] to programmatically delete conversations when a space approaches the 10,000 conversation limit
 
 
 # Quota
