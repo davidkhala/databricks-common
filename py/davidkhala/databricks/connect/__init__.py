@@ -15,7 +15,7 @@ class DatabricksConnect:
         cli.test()
 
     @staticmethod
-    def get() -> (SparkSession, bool):
+    def get() -> tuple[SparkSession, bool]:
         builder = DatabricksSession.builder
         try:
             spark = builder.validateSession(True).getOrCreate()

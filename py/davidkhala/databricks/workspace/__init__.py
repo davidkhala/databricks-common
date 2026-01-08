@@ -1,10 +1,10 @@
-import os
 import pathlib
 from typing import Union
 
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.config import Config
 from databricks.sdk.core import ApiClient
+from databricks.sdk.dbutils import RemoteDbUtils
 from databricks.sdk.service.iam import User
 
 
@@ -46,7 +46,7 @@ class Workspace:
         """
         from davidkhala.databricks.workspace.catalog import Catalog
 
-        c= Catalog(self.client)
+        c = Catalog(self.client)
         if c.get(c.default):
             return c.default
         else:
@@ -75,7 +75,7 @@ class Workspace:
         return self.client.metastores.current()
 
     @property
-    def dbutils(self):
+    def dbutils(self) -> RemoteDbUtils:
         return self.client.dbutils
 
     @property

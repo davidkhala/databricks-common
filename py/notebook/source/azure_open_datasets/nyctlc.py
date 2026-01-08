@@ -1,6 +1,5 @@
 import pathlib
 import warnings
-from http.client import responses
 
 from davidkhala.databricks import is_databricks_notebook
 from davidkhala.databricks.workspace import Workspace

@@ -1,5 +1,7 @@
 # Agent Bricks
-Beta： enroll required
+> Building Information Extraction Agents with Agent Bricks
+
+Beta： feature enroll required
 - Under [workspace-level preview](https://learn.microsoft.com/en-us/azure/databricks/admin/workspace-settings/manage-previews#-manage-workspace-level-previews)
   - named as **Mosaic AI Agent Bricks Preview**
 
