@@ -14,7 +14,7 @@ dependencies = [
 [project.optional-dependencies]
 connect = [
     "databricks-connect<18",
-    "davidkhala-spark",
+    "davidkhala-spark>=0.1.3",
 ]
 gcp = [
     "davidkhala-gcp",

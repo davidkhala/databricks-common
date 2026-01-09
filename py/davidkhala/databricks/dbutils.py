@@ -32,8 +32,8 @@ class FS:
         content = self._.fs.head(path)
         print(content)
         return content
-
-    ignore = [".DS_Store", ".md", ".sh", ".git", ".github", ".gitignore","LICENSE"]
+    
+    ignore = [".DS_Store", ".md", ".sh", ".git", ".github", ".gitignore", "LICENSE"]
 
     def ls(self, path, *, ignore_patterns: list[str] = None) -> Iterable[FileInfo]:
         if not ignore_patterns:

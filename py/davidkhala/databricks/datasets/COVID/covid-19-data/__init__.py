@@ -1,6 +1,7 @@
-from davidkhala.databricks.workspace import Workspace
-from davidkhala.databricks.workspace.catalog import Catalog, Schema
-from davidkhala.databricks.workspace.table import Table
+from databricks.sdk import WorkspaceClient
+from pyspark.sql.connect.session import SparkSession
+
+from davidkhala.databricks.datasets import Loader as BaseLoader
 
 table_path_map = {
     "colleges": "colleges/colleges.csv",
@@ -17,15 +18,8 @@ table_path_map = {
 
 catalog = 'COVID'
 schema = 'covid-19-data'
-class Loader:
-    w = Workspace()
-    c = Catalog(w.client)
-    @classmethod
-    def start(cls):
-        cls.c.create(catalog)
 
-        s = Schema(cls.w.client,schema, catalog )
-        s.create()
 
-        # load table if not exist, you need to use spark dataframe
-
+class Loader(BaseLoader):
+    def __init__(self, w: WorkspaceClient, spark: SparkSession):
+        super().__init__(w, spark, table_path_map, schema=schema, catalog=catalog)
