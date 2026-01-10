@@ -14,10 +14,6 @@ w = Workspace.from_local()
 
 class WorkspaceTest(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        print(w.config_token)
-
     def test_default_catalog(self):
         self.assertEqual(w.catalog, os.environ.get("CATALOG") or "az_databricks")
     def test_notebook(self):
@@ -32,8 +28,21 @@ class WorkspaceTest(unittest.TestCase):
     def test_clusters(self):
         c = Cluster(w.client)
         self.assertGreaterEqual(len(list(c.clusters())), 0)
+    def test_tier(self):
+        from databricks.sdk import AccountClient
+        print(w.config)
+        account = AccountClient()
+        for workspace in account.workspaces.list():
+            print(workspace.workspace_name, workspace.pricing_tier)
+    def test_account(self):
 
-
+        self.skipTest(
+            'databricks error: User is not a member of this account.')
+        # TODO login troubleshoot
+        from databricks.sdk import AccountClient
+        account = AccountClient()
+        for workspace in account.workspaces.list():
+            print(workspace.workspace_name, workspace.pricing_tier)
 from davidkhala.databricks.workspace.table import Table
 
 
@@ -121,8 +130,8 @@ class CatalogTest(unittest.TestCase):
     s = Schema(w.client, 'test')
 
     def test_get(self):
-        _ = self.c.get('not_exists')
-        print(_)
+        self.assertIsNone(self.c.get('not_exists'))
+        print(self.c.get().storage_root) # print default
 
     def test_create(self):
         self.c.create('test')

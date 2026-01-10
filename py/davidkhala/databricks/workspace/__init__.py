@@ -27,12 +27,12 @@ class Workspace:
     def config(self) -> Config:
         """
         It returns raw token content. TAKE CARE for secret leakage.
-        :return: {'host':'https://adb-662901427557763.3.azuredatabricks.net', 'token':'', 'auth_type':'pat'}
+        :return: {'host':'https://adb-662901427557763.3.azuredatabricks.net', 'token':'...', 'auth_type':'pat'}
         """
         return self.client.config
 
     @property
-    def config_token(self):
+    def config_token(self)->str:
         return self.config.as_dict().get('token')
 
     @property
@@ -54,18 +54,18 @@ class Workspace:
 
     @property
     def cloud(self):
-        token: str = self.config.token
-        if token is not None:
+        host = self.config.host
 
-            if token.startswith('https://adb-') and token.endswith('.azuredatabricks.net'):
-                # adb-662901427557763.3.azuredatabricks.net
-                return 'azure'
-            elif token.startswith('https://dbc-') and token.endswith('.cloud.databricks.com'):
-                # dbc-8df7b30e-676a.cloud.databricks.com
-                return "aws"
-            elif token.endswith('.gcp.databricks.com'):
-                # 1105010096141051.1.gcp.databricks.com
-                return "gcp"
+        if host.startswith('https://adb-') and host.endswith('.azuredatabricks.net'):
+            # adb-662901427557763.3.azuredatabricks.net
+            return 'azure'
+        elif host.startswith('https://dbc-') and host.endswith('.cloud.databricks.com'):
+            # dbc-8df7b30e-676a.cloud.databricks.com
+            return "aws"
+        elif host.endswith('.gcp.databricks.com'):
+            # 1105010096141051.1.gcp.databricks.com
+            return "gcp"
+        return None
 
     @property
     def metastore(self):

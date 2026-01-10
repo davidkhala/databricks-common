@@ -2,7 +2,7 @@ from databricks.sdk import WorkspaceClient
 from pyspark.sql.connect.session import SparkSession
 
 from davidkhala.databricks.datasets import Loader as BaseLoader
-
+from davidkhala.databricks.datasets.COVID import catalog
 table_path_map = {
     "colleges": "colleges/colleges.csv",
     "excess_deaths": "excess-deaths/deaths.csv",
@@ -16,10 +16,12 @@ table_path_map = {
     "us": "us.csv",
 }
 
-catalog = 'COVID'
-schema = 'covid-19-data'
+schema_path = 'covid-19-data'
+schema = 'covid_19_data'
 
 
 class Loader(BaseLoader):
     def __init__(self, w: WorkspaceClient, spark: SparkSession):
-        super().__init__(w, spark, table_path_map, schema=schema, catalog=catalog)
+        super().__init__(w, spark, table_path_map,
+                         schema=schema, schema_path= schema_path,
+                         catalog=catalog)

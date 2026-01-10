@@ -39,6 +39,13 @@ function Connect-Serverless
     (Invoke-WebRequest "https://raw.githubusercontent.com/davidkhala/windows-utils/refs/heads/master/editor.ps1" -UseBasicParsing).Content | Invoke-Expression
     Append $env:USERPROFILE/.databrickscfg serverless_compute_id=auto
 }
+function Configure-Account{
+    param (
+        [string]$account # account id
+    )
+
+    databricks auth login --host https://accounts.cloud.databricks.com --account-id $account
+}
 if ($args.Count -gt 0)
 {
     Invoke-Expression ($args -join " ")

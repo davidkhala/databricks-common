@@ -1,5 +1,6 @@
 from databricks.sdk import WorkspaceClient
 from databricks.sdk.errors import platform
+from databricks.sdk.service.catalog import CatalogInfo
 
 from davidkhala.databricks.workspace.types import ClientWare
 
@@ -21,7 +22,7 @@ class Catalog(ClientWare):
 
         if self.get(name):
             return None
-
+        # TODO databricks.sdk.errors.platform.InvalidParameterValue: Please use the UI to create a catalog with Default Storage.
         if with_metastore_level_storage:
             return self.catalogs.create(name)
         else:
@@ -29,13 +30,13 @@ class Catalog(ClientWare):
                 storage_root = self.get().storage_root
             return self.catalogs.create(name, storage_root=storage_root)
 
-    def get(self, name=None):
+    def get(self, name: str = None)-> CatalogInfo|None:
         if not name:
             name = self.default
         try:
             return self.catalogs.get(name)
         except platform.NotFound as e:
-            if str(e) == f"Catalog '{name}' does not exist.":
+            if str(e) == f"Catalog '{name.lower()}' does not exist." and e.error_code == 'CATALOG_DOES_NOT_EXIST':
                 return None
             else:
                 raise e

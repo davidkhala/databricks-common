@@ -1,14 +1,14 @@
-auth() {
-    databricks auth describe
-}
 metastores() {
-    databricks metastores current $@
+  databricks metastores current $@
 }
 metastore() {
-    metastores | jq -r .metastore_id
+  metastores | jq -r .metastore_id
 }
 user() {
-    databricks current-user me
+  databricks current-user me
+}
+config() {
+  databricks auth describe
 }
 
 "$@"
