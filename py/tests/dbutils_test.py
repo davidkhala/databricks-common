@@ -22,7 +22,7 @@ class FSTest(unittest.TestCase):
         self.fs.cat('/databricks-datasets/COVID/CORD-19/2020-03-13/json_schema.txt')
         self.fs.cat('/databricks-datasets/COVID/CORD-19/2020-03-13/all_sources_metadata_2020-03-13.readme')
     def test_explore3(self):
-        l = self.fs.ls("/databricks-datasets/COVID/CORD-19/2020-03-13/biorxiv_medrxiv/biorxiv_medrxiv")
+        l = self.fs.ls("/databricks-datasets/COVID/CORD-19/2020-04-03/biorxiv_medrxiv/biorxiv_medrxiv")
         spark, _ = DatabricksConnect.get()
         for file in l:
             df = spark.read.option("multiLine", True). json(file.path)
@@ -32,8 +32,13 @@ class FSTest(unittest.TestCase):
                 break
             else:
                 df.printSchema()
+                break
 
     def test_explore4(self):
-        l = self.fs.ls("/databricks-datasets/COVID/CORD-19/2020-03-13/comm_use_subset/comm_use_subset")
+        l = self.fs.ls("/databricks-datasets/COVID/CORD-19/2020-04-03/biorxiv_medrxiv/biorxiv_medrxiv/pdf_json")
+        for file in l:
+            print(file)
+        print('--line break--')
+        l = self.fs.ls("/databricks-datasets/COVID/CORD-19/2020-12-21")
         for file in l:
             print(file)

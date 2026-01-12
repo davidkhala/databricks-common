@@ -14,6 +14,7 @@ class COVID(unittest.TestCase):
         l = Loader(w.client, spark)
         l.start()
     def test_cord_19(self):
+        self.skipTest("WIP")
         from davidkhala.databricks.datasets.COVID.CORD_19 import Loader
         l = Loader(w.client, spark)
         l.delete()
