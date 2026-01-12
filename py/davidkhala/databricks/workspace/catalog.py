@@ -30,7 +30,7 @@ class Catalog(ClientWare):
                 storage_root = self.get().storage_root
             return self.catalogs.create(name, storage_root=storage_root)
 
-    def get(self, name: str = None)-> CatalogInfo|None:
+    def get(self, name: str = None) -> CatalogInfo | None:
         if not name:
             name = self.default
         try:
@@ -48,7 +48,7 @@ class Catalog(ClientWare):
 class Schema:
     default = 'default'
     client: WorkspaceClient
-    name = default
+    name: str = default
     catalog: str
 
     def __init__(self, client: WorkspaceClient, name=None, catalog: str = None):
@@ -74,7 +74,7 @@ class Schema:
         try:
             return self.schemas.create(self.name, self.catalog)
         except platform.BadRequest as e:
-            if str(e) == f"Schema '{self.name}' already exists":
+            if str(e) == f"Schema '{self.name.lower()}' already exists":
                 return None
             raise e
 
