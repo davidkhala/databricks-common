@@ -36,7 +36,7 @@ function Connect-Serverless
         databricks configure
     }
     databricks current-user me # validate
-    (Invoke-WebRequest "https://raw.githubusercontent.com/davidkhala/windows-utils/refs/heads/master/editor.ps1" -UseBasicParsing).Content | Invoke-Expression
+    (Invoke-WebRequest "https://raw.githubusercontent.com/davidkhala/windows-utils/refs/heads/master/powershell/editor.ps1" -UseBasicParsing).Content | Invoke-Expression
     Append $env:USERPROFILE/.databrickscfg serverless_compute_id=auto
 }
 function Configure-Account{
