@@ -12,7 +12,7 @@ login-serverless() {
     databricks configure
   fi
   
-  python3 "$(dirname "$0")/databrickscfg.py"
+  python3 "$(dirname "$0")/setup.py"
 
 }
 login() {

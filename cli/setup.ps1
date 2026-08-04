@@ -36,7 +36,7 @@ function Connect-Serverless
         databricks configure
     }
     databricks current-user me # validate
-    python "$PSScriptRoot/databrickscfg.py"
+    python "$PSScriptRoot/setup.py"
 }
 function Configure-Account{
     param (

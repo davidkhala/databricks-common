@@ -3,16 +3,20 @@ import unittest
 from davidkhala.databricks.connect import DatabricksConnect
 from davidkhala.databricks.workspace import Workspace
 
-w = Workspace.from_local()
-spark, _ = DatabricksConnect.get()
+
+class _Base(unittest.TestCase):
+    def setUp(self):
+        spark, _ = DatabricksConnect.get()
+        self.spark = spark
+        self.client = Workspace.from_local().client
 
 
-class COVID(unittest.TestCase):
+class COVID(_Base):
     def test_covid_19_data(self):
         from davidkhala.databricks.datasets.COVID.covid_19_data import Loader
-
-        l = Loader(w.client, spark)
+        l = Loader(self.client, self.spark)
         l.start()
+
     def test_cord_19(self):
         self.skipTest("WIP")
         from davidkhala.databricks.datasets.COVID.CORD_19 import Loader
@@ -21,10 +25,10 @@ class COVID(unittest.TestCase):
         l.start()
 
 
-class DataGov(unittest.TestCase):
+class DataGov(_Base):
     def test_farmers_markets(self):
         from davidkhala.databricks.datasets.data_gov.farmers_markets_geographic import Loader
-        l = Loader(w.client, spark)
+        l = Loader(self.client, self.spark)
         l.start()
 
 

@@ -32,6 +32,7 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     environment: gcp
+    needs: self-reference
     steps:
       - uses: actions/checkout@main
       - run: ./cli/setup.sh install
