@@ -14,7 +14,8 @@ class ConfigTestCase(unittest.TestCase):
         c.as_one()
         self.assertIsNotNone(c.cluster_id)
         print(c.cluster_id)
-        c.start()
+        c.start() # This takes ~6 minutes
+        c.stop()
 
 
 if __name__ == '__main__':

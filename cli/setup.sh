@@ -11,7 +11,8 @@ login-serverless() {
   else
     databricks configure
   fi
-  curl -s https://raw.githubusercontent.com/davidkhala/linux-utils/refs/heads/main/editors.sh | bash -s configure "serverless_compute_id=auto" ~/.databrickscfg
+  
+  python3 "$(dirname "$0")/databrickscfg.py"
 
 }
 login() {

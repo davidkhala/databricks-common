@@ -2,7 +2,7 @@ import unittest
 
 from davidkhala.databricks.connect import Session, DatabricksConnect
 from davidkhala.databricks.workspace import Workspace
-
+from servermore import get
 
 class DatabricksConnectTest(unittest.TestCase):
     data = [
@@ -40,7 +40,7 @@ class DatabricksConnectTest(unittest.TestCase):
         spark.stop()
 
     def test_servermore(self):
-        from tests.servermore import get
+
         spark, controller = get(self.w)
         controller.start()
         spark.sql('select 1')

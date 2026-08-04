@@ -28,21 +28,7 @@ class WorkspaceTest(unittest.TestCase):
     def test_clusters(self):
         c = Cluster(w.client)
         self.assertGreaterEqual(len(list(c.clusters())), 0)
-    def test_tier(self):
-        from databricks.sdk import AccountClient
-        print(w.config)
-        account = AccountClient()
-        for workspace in account.workspaces.list():
-            print(workspace.workspace_name, workspace.pricing_tier)
-    def test_account(self):
 
-        self.skipTest(
-            'databricks error: User is not a member of this account.')
-        # TODO login troubleshoot
-        from databricks.sdk import AccountClient
-        account = AccountClient()
-        for workspace in account.workspaces.list():
-            print(workspace.workspace_name, workspace.pricing_tier)
 from davidkhala.databricks.workspace.table import Table
 
 

@@ -10,8 +10,8 @@ from davidkhala.databricks.connect import DatabricksConnect
 from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.server import Cluster
 from davidkhala.databricks.workspace.warehouse import Warehouse
-from tests.servermore import get
-from tests.stream import to_table, wait_data, clean, wait_warehouse_data
+from servermore import get
+from stream import to_table, wait_data, clean, wait_warehouse_data
 
 
 class SampleStreamTestCase(unittest.TestCase):
@@ -35,10 +35,7 @@ class SampleStreamTestCase(unittest.TestCase):
         df = sample(self.spark)
 
         query: StreamingQuery
-        query, _ = to_table(df, self.table, self.w, self.spark)
-        query.awaitTermination()
 
-        # FIXME Spark Connect bug? why this is different than in notebook?
         query, _sql = to_table(df, self.table, self.w, self.spark)
         query.awaitTermination()
 

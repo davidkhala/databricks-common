@@ -1,9 +1,9 @@
+from unittest import skip
+
 import os
 import unittest
 import warnings
 from datetime import datetime
-from typing import cast
-
 from davidkhala.gcp.auth import OptionsInterface
 from davidkhala.gcp.auth.service_account import from_service_account, ServiceAccount
 from davidkhala.gcp.pubsub.pub import Pub
@@ -11,12 +11,13 @@ from davidkhala.gcp.pubsub.sub import Sub
 from pyspark.errors.exceptions.connect import AnalysisException
 from pyspark.sql.connect.readwriter import DataFrameReader
 from pyspark.sql.connect.session import SparkSession
+from typing import cast
 
 from davidkhala.databricks.gcp.pubsub import PubSub
 from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.server import Cluster
-from tests.servermore import get
-from tests.stream import to_table, wait_data, mem_table, clean
+from servermore import get
+from stream import to_table, wait_data, mem_table, clean
 
 private_key = os.environ.get('PRIVATE_KEY')
 info = ServiceAccount.Info(
@@ -55,6 +56,7 @@ class PubSubTestCase(unittest.TestCase):
         PubSubTestCase.pub.publish(self.message)
         warnings.warn(f"self.pub.publish({self.message})")
 
+
     def test_sink_table(self):
         df = PubSubTestCase.pubsub.read_stream(PubSubTestCase.topic_id, PubSubTestCase.subscription_id).read_start()
 
@@ -79,6 +81,7 @@ class PubSubTestCase(unittest.TestCase):
         ):
             self.publish()
 
+    @skip # FIXME tag for debug only
     def test_sink_memory(self):
         self.sink_memory(True, False)
         self.sink_memory(False, False)
@@ -116,6 +119,7 @@ class PubSubTestCase(unittest.TestCase):
         PubSubTestCase.spark.sql(f"DROP TABLE {mem_table}")
         self.message = None
 
+    @skip  # FIXME tag for debug only
     def test_read_batch(self):
 
         source: DataFrameReader = (

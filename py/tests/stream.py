@@ -1,5 +1,5 @@
 from time import sleep
-from typing import Callable, Any, overload, List
+from typing import Callable, Any, List, Optional
 
 from pyspark.sql.connect.dataframe import DataFrame
 from pyspark.sql.connect.session import SparkSession
@@ -27,17 +27,19 @@ def wait_data(spark, _sql, poll_count=1, interceptor: Callable[[DataFrame, int],
         return r
 
 
-def wait_warehouse_data(warehouse: Warehouse, _sql, poll_count=1, interceptor: Callable[[List[List[str]], int], Any] = None):
-    r = warehouse.run(_sql)
-    if r.manifest.total_row_count == 0:
-        sleep(1)
+def wait_warehouse_data(warehouse: Warehouse, _sql, interceptor: Callable[[List[List[str]], int], Any] | None = None):
+    poll_count = 0
+    while True:
+        r = warehouse.run(_sql)
+        if r.manifest.total_row_count > 0:
+            return r
+        poll_count += 1
+        print(f"poll...{poll_count}")
         if interceptor:
             signal = interceptor(r.result.data_array, poll_count)
-            if signal: return
-        print(f"poll...{poll_count}")
-        return wait_warehouse_data(warehouse, _sql, poll_count + 1, interceptor)
-    else:
-        return r
+            if signal:
+                return
+        sleep(1)
 
 
 def clean(table, w: Workspace):

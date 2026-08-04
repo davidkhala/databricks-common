@@ -6,11 +6,20 @@ on:
 
 jobs:
   self-reference:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@main
-      - run: ./cli/setup.sh install
-      - run: ./cli/setup.sh login-serverless ${{ vars.WORKSPACE }} ${{ secrets.PAT }}
+      - if: runner.os == 'Windows'
+        run: |
+          ./cli/setup.ps1 Install
+          ./cli/setup.ps1 Connect-Serverless ${{ vars.WORKSPACE }} ${{ secrets.PAT }}
+      - if: runner.os == 'Linux'
+        run: |
+          ./cli/setup.sh install
+          ./cli/setup.sh login-serverless ${{ vars.WORKSPACE }} ${{ secrets.PAT }}
       - uses: astral-sh/setup-uv@main
         with:
           version: "latest"
@@ -32,6 +41,7 @@ jobs:
           working-directory: py
           test-entry-point: test
           tests: py/tests
+          version: 3.12 # hardcode is required due to error: Python versions in the Spark Connect client and server are different
         env:
           CLIENT_EMAIL: ${{vars.CLIENT_EMAIL}}
           CLIENT_ID: ${{vars.CLIENT_ID}}
@@ -39,3 +49,4 @@ jobs:
           PRIVATE_KEY: ${{secrets.PRIVATE_KEY}}
           NEW_RELIC_LICENSE_KEY: ${{secrets.NEW_RELIC_LICENSE_KEY}}
           CATALOG: ${{vars.CATALOG}}
+          AZURE_CLIENT_SECRET: ${{secrets.AZURE_CLIENT_SECRET}}
