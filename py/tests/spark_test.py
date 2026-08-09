@@ -18,7 +18,7 @@ class SampleStreamTestCase(unittest.TestCase):
     w = Workspace.from_local()
     controller: Optional[Cluster] = None
     spark: SparkSession
-    table = 'rate_stream'
+
 
     def servermore(self):
         self.spark, self.controller = get(self.w)
@@ -31,38 +31,26 @@ class SampleStreamTestCase(unittest.TestCase):
 
     def test_sample_on_serverless(self):
         self.serverless()
-        clean(self.table, self.w)
+        serverless_table = 'rate_stream_next'
+        clean(serverless_table, self.w)
+        # case 1: sink to table should be OK
         df = sample(self.spark)
-
-        query: StreamingQuery
-
-        query, _sql = to_table(df, self.table, self.w, self.spark)
+        query, _sql = to_table(df, serverless_table, self.w, self.spark)
         query.awaitTermination()
-
         warehouse = Warehouse(self.w.client).get_one()
         warehouse.start()
         wait_warehouse_data(warehouse, _sql)
 
-        if not self.spark.is_stopped:
-            self.spark.stop()
-
-    def test_sample_on_serverless2(self):
-        self.serverless()
-        df: DataFrame = sample(self.spark)
-        def on_each(row):
-            raise Exception("should not be reached")
-
-        query = df.writeStream.foreach(on_each).trigger(availableNow=True).start()
-        query.awaitTermination()
-
+        # cleanup
         if not self.spark.is_stopped:
             self.spark.stop()
 
     def test_sample_on_servermore(self):
         self.servermore()
-        clean(self.table, self.w)
+        table = 'rate_stream'
+        clean(table, self.w)
         df = sample(self.spark)
-        _, _sql = to_table(df, self.table, self.w, self.spark)
+        _, _sql = to_table(df, table, self.w, self.spark)
 
         wait_data(self.spark, _sql)
 

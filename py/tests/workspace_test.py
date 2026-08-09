@@ -1,5 +1,6 @@
 import os
 import unittest
+from pathlib import Path
 
 from davidkhala.utils.syntax.fs import write_json
 
@@ -16,6 +17,7 @@ class WorkspaceTest(unittest.TestCase):
 
     def test_default_catalog(self):
         self.assertEqual(w.catalog, os.environ.get("CATALOG") or "az_databricks")
+
     def test_notebook(self):
         s = path.SDK.from_workspace(w)
         local_notebook_path = os.path.join(os.path.dirname(__file__), "../notebook/context.ipynb")
@@ -28,6 +30,7 @@ class WorkspaceTest(unittest.TestCase):
     def test_clusters(self):
         c = Cluster(w.client)
         self.assertGreaterEqual(len(list(c.clusters())), 0)
+
 
 from davidkhala.databricks.workspace.table import Table
 
@@ -70,8 +73,16 @@ class VolumeFSTest(unittest.TestCase):
         cls.v.create()
 
     def test_fs_upload(self):
-        self.fs.upload('self/pyproject.toml')
-        print(self.fs.read('pyproject.toml'))
+        source = Path(__file__).parent / 'self' / 'pyproject.toml'
+        target = self.fs.upload(source, overwrite=True)
+        self.assertEqual("/Volumes/az_databricks/default/volume/pyproject.toml", target)
+        b = self.fs.read(absolute_path=target).read()
+        with open(source, "rb") as f:
+            self.assertEqual(b, f.read())
+        self.assertTrue(self.fs.exists(absolute_path=target))
+    def test_exist(self):
+        malformed = "/Volumes/az_databricks/default/volume/pyproject1.toml"
+        self.assertFalse(self.fs.exists(absolute_path=malformed))
 
     @classmethod
     def tearDownClass(cls):
@@ -106,7 +117,7 @@ class WarehouseTest(unittest.TestCase):
                    target_table_full_name
             from system.access.table_lineage
             where source_table_full_name is not null
-              and target_table_full_name is not null        
+              and target_table_full_name is not null
             """)
         write_json(Warehouse.pretty(r), 'table-lineage')
 
@@ -117,7 +128,7 @@ class CatalogTest(unittest.TestCase):
 
     def test_get(self):
         self.assertIsNone(self.c.get('not_exists'))
-        print(self.c.get().storage_root) # print default
+        print(self.c.get().storage_root)  # print default
 
     def test_create(self):
         self.c.create('test')

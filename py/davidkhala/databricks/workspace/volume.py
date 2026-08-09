@@ -1,9 +1,13 @@
-import base64
 import io
 import os
+from os import PathLike
+from typing import BinaryIO
 
 from databricks.sdk import WorkspaceClient, errors
+from databricks.sdk.errors import NotFound
+from databricks.sdk.mixins.files import DownloadFileResult
 from databricks.sdk.service.catalog import VolumeType
+from databricks.sdk.service.files import DownloadResponse
 
 from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.catalog import Schema
@@ -33,7 +37,7 @@ class Volume(ClientWare):
             return self.client.volumes.read(self.full_name)
         except errors.platform.ResourceDoesNotExist as e:
             if str(e) == f"Volume '{self.full_name}' does not exist.":
-                return
+                return None
             raise e
 
     def create(self, volume_type=VolumeType.MANAGED):
@@ -76,21 +80,30 @@ class VolumeFS(ClientWare):
             file_bytes = file.read()
             binary_data = io.BytesIO(file_bytes)
             self.client.files.upload(target_path, binary_data, overwrite=overwrite)
+        return target_path
 
     def ls(self):
         return self.client.files.list_directory_contents(self.path)
 
-    def exists(self, dbfs_path):
-        # TODO migrate to self.client.files.get_metadata()
-        return self.client.dbfs.exists(f"dbfs:/{self.path}/{dbfs_path}")
+    def exists(self, *, relative_path=None, absolute_path=None) -> bool:
+        if not absolute_path:
+            absolute_path = f"{self.path}/{relative_path}"
+        try:
+            self.client.files.get_metadata(absolute_path)
+            return True
+        except NotFound:
+            return False
 
-    def read(self, relative_path):
-        r = self.client.dbfs.read(f"dbfs:/{self.path}/{relative_path}")
-        return base64.b64decode(r.data).decode('utf-8')
 
-    def download(self, relative_path):
-        resp = self.client.files.download(f"{self.path}/{relative_path}")
-        return resp.contents.read()
+    def read(self, *, relative_path=None, absolute_path = None) -> BinaryIO | None:
+        if not absolute_path:
+            absolute_path = f"{self.path}/{relative_path}"
+        resp: DownloadResponse = self.client.files.download(absolute_path)
+        return resp.contents
+
+    def download(self, relative_path: str, sink: PathLike):
+        resp: DownloadFileResult = self.client.files.download_to(f"{self.path}/{relative_path}", str(sink))
+        return resp
 
     def rm(self, relative_volume_path, recursive=True):
         target_path = f"{self.path}/{relative_volume_path}"
