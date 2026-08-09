@@ -1,5 +1,5 @@
 from time import sleep
-from typing import Callable, Any, List, Optional
+from typing import Callable, Any, List
 
 from pyspark.sql.connect.dataframe import DataFrame
 from pyspark.sql.connect.session import SparkSession

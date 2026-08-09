@@ -31,7 +31,6 @@ jobs:
         working-directory: py/tests/self
   tests:
     runs-on: ubuntu-latest
-    environment: gcp
     needs: self-reference
     steps:
       - uses: actions/checkout@main
@@ -40,7 +39,24 @@ jobs:
       - uses: davidkhala/uv-buildpack@main
         with:
           working-directory: py
-          test-entry-point: test
+          test-entry-point: pytest --ignore=integration --ignore=mlflow
+          tests: py/tests
+          version: 3.12 # hardcode is required due to error: Python versions in the Spark Connect client and server are different
+        env:
+          CATALOG: ${{vars.CATALOG}}
+          AZURE_CLIENT_SECRET: ${{secrets.AZURE_CLIENT_SECRET}}
+  gcp:
+    runs-on: ubuntu-latest
+    environment: gcp
+    needs: tests
+    steps:
+      - uses: actions/checkout@main
+      - run: ./cli/setup.sh install
+      - run: ./cli/setup.sh login-serverless ${{ vars.WORKSPACE }} ${{ secrets.PAT }}
+      - uses: davidkhala/uv-buildpack@main
+        with:
+          working-directory: py
+          test-entry-point: pytest --ignore=integration
           tests: py/tests
           version: 3.12 # hardcode is required due to error: Python versions in the Spark Connect client and server are different
         env:
@@ -48,6 +64,3 @@ jobs:
           CLIENT_ID: ${{vars.CLIENT_ID}}
           PRIVATE_KEY_ID: ${{vars.PRIVATE_KEY_ID}}
           PRIVATE_KEY: ${{secrets.PRIVATE_KEY}}
-          NEW_RELIC_LICENSE_KEY: ${{secrets.NEW_RELIC_LICENSE_KEY}}
-          CATALOG: ${{vars.CATALOG}}
-          AZURE_CLIENT_SECRET: ${{secrets.AZURE_CLIENT_SECRET}}
