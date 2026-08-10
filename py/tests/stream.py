@@ -27,7 +27,9 @@ def wait_data(spark, _sql, poll_count=1, interceptor: Callable[[DataFrame, int],
         return r
 
 
-def wait_warehouse_data(warehouse: Warehouse, _sql, interceptor: Callable[[List[List[str]], int], Any] | None = None):
+def wait_warehouse_data(warehouse: Warehouse,
+                        _sql,
+                        interceptor: Callable[[List[List[str]], int], Any] | None = None):
     poll_count = 0
     while True:
         r = warehouse.run(_sql)
@@ -38,7 +40,7 @@ def wait_warehouse_data(warehouse: Warehouse, _sql, interceptor: Callable[[List[
         if interceptor:
             signal = interceptor(r.result.data_array, poll_count)
             if signal:
-                return
+                return None
         sleep(1)
 
 
