@@ -2,6 +2,7 @@ name: integration
 
 on:
   workflow_dispatch:
+  push:
 
 jobs:
   gcp:
@@ -18,7 +19,6 @@ jobs:
           tests: py/tests
           version: 3.12 # hardcode is required due to error: Python versions in the Spark Connect client and server are different
         env:
-          PYTHONPATH: py:py/tests
           CLIENT_EMAIL: ${{vars.CLIENT_EMAIL}}
           CLIENT_ID: ${{vars.CLIENT_ID}}
           PRIVATE_KEY_ID: ${{vars.PRIVATE_KEY_ID}}

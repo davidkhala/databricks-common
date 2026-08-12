@@ -2,7 +2,7 @@ name: Python
 
 on:
   workflow_dispatch:
-  push:
+#  push:
 
 jobs:
   self-reference:

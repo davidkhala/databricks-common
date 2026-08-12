@@ -51,7 +51,7 @@ def clean(table, w: Workspace):
     return volume
 
 
-def to_table(df: DataFrame, table, w: Workspace, spark: SparkSession) -> (StreamingQuery, str):
+def to_table(df: DataFrame, table, w: Workspace, spark: SparkSession) -> tuple[StreamingQuery, str]:
     volume = Volume(w, table)
     t = SinkTable(df, Session(spark).serverless)
     t.with_trigger()

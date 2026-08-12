@@ -13,13 +13,16 @@ from pyspark.sql.connect.readwriter import DataFrameReader
 
 from davidkhala.databricks.gcp.pubsub import PubSub
 from davidkhala.databricks.workspace import Workspace
-from tests.package.servermore import get
-from tests.package.stream import to_table, wait_data, mem_table, clean
+from tests.servermore import get
+from tests.stream import to_table, wait_data, mem_table, clean
 
 
 class BaseTestCase(unittest.TestCase):
     def setUp(self):
         private_key = os.environ.get('PRIVATE_KEY')
+        if private_key:
+            # GitHub Actions secrets encode newlines as literal \n; restore them
+            private_key = private_key.replace('\\n', '\n')
         self.info = ServiceAccount.Info(
             client_email=os.environ.get(
                 'CLIENT_EMAIL') or 'data-integration@gcp-data-davidkhala.iam.gserviceaccount.com',
@@ -33,10 +36,10 @@ class PubSubTestCase(BaseTestCase):
     topic_id = 'databricks'
     subscription_id = 'spark'
     w = Workspace()
-    message: str
 
     def setUp(self):
         super().setUp()
+        self.message = None
         OptionsInterface.token.fget(self.auth)
         self.pub = Pub(self.topic_id, self.auth)
         self.sub = Sub(self.subscription_id, self.topic_id, self.auth)
@@ -49,6 +52,7 @@ class PubSubTestCase(BaseTestCase):
         self.message = f"hello world at {datetime.now()}"
         self.pub.publish(self.message)
         warnings.warn(f"self.pub.publish({self.message})")
+
 
     def test_sink_table(self):
         df = self.pubsub.read_stream(self.topic_id, self.subscription_id).read_start()
@@ -73,7 +77,6 @@ class PubSubTestCase(BaseTestCase):
                 and not self.message
         ):
             self.publish()
-
     def test_sink_memory(self):
         self.sink_memory(True, False)
         self.sink_memory(False, False)
@@ -109,7 +112,6 @@ class PubSubTestCase(BaseTestCase):
         query.stop()
         self.spark.sql(f"DROP TABLE {mem_table}")
         self.message = None
-
     def test_read_batch(self):
 
         source: DataFrameReader = (

@@ -6,8 +6,8 @@ from pyspark.sql.connect.session import SparkSession
 
 from davidkhala.databricks.workspace import Workspace
 from davidkhala.databricks.workspace.server import Cluster
-from tests.package.servermore import get
-from tests.package.stream import to_table, wait_data, clean
+from tests.servermore import get
+from tests.stream import to_table, wait_data, clean
 
 
 class SampleStreamTestCase(unittest.TestCase):
