@@ -13,8 +13,8 @@ from pyspark.sql.connect.readwriter import DataFrameReader
 
 from davidkhala.databricks.gcp.pubsub import PubSub
 from davidkhala.databricks.workspace import Workspace
-from tests.servermore import get
-from tests.stream import to_table, wait_data, mem_table, clean
+from tests.package.servermore import get
+from tests.package.stream import to_table, wait_data, mem_table, clean
 
 
 class BaseTestCase(unittest.TestCase):

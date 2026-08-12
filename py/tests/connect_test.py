@@ -2,7 +2,7 @@ import unittest
 
 from davidkhala.databricks.connect import Session, DatabricksConnect
 from davidkhala.databricks.workspace import Workspace
-from servermore import get
+from tests.package.servermore import get
 
 class DatabricksConnectTest(unittest.TestCase):
     data = [
