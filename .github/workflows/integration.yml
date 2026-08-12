@@ -1,0 +1,25 @@
+name: integration
+
+on:
+  workflow_dispatch:
+
+jobs:
+  gcp:
+    runs-on: ubuntu-latest
+    environment: gcp
+    steps:
+      - uses: actions/checkout@main
+      - run: ./cli/setup.sh install
+      - run: ./cli/setup.sh login-serverless ${{ vars.WORKSPACE }} ${{ secrets.PAT }}
+      - uses: davidkhala/uv-buildpack@main
+        with:
+          working-directory: py
+          test-entry-point: pytest integration/gcp_test.py
+          tests: py/tests
+          version: 3.12 # hardcode is required due to error: Python versions in the Spark Connect client and server are different
+        env:
+          PYTHONPATH: py:py/tests
+          CLIENT_EMAIL: ${{vars.CLIENT_EMAIL}}
+          CLIENT_ID: ${{vars.CLIENT_ID}}
+          PRIVATE_KEY_ID: ${{vars.PRIVATE_KEY_ID}}
+          PRIVATE_KEY: ${{secrets.PRIVATE_KEY}}
